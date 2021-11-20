@@ -24,15 +24,15 @@ def image_params(schema) -> dict:
 
 
 @pytest.fixture()
-def image(image_params) -> ImageBackground:
+def background(image_params) -> ImageBackground:
     with patch('PIL.ImageFont.truetype') as mock:
         return ImageBackground(**image_params)
 
 
 @pytest.fixture()
-def pattern_params(image, schema) -> dict:
+def pattern_params(background, schema) -> dict:
     return {
-        'image': image.generate_image_background(),
+        'background': background,
         'schema': schema,
         'text': 'test',
         'start_line_width': 3,
@@ -102,33 +102,32 @@ def test_background_height_should_be_calculated_dynamically(mock, image_params) 
     assert image.get_height() == expected_height
 
 
-def test_getting_proper_width_of_one_tile(image) -> None:
+def test_getting_proper_width_of_one_tile(background) -> None:
     """ tile is a 1x1 square field inside image defining one letter
     from schema """
-    tile_width = round(image.width/image.num_of_colums)
+    tile_width = round(background.width/background.num_of_colums)
     tile_height = tile_width
-    assert image.get_tile_size() == (tile_width, tile_height)
+    assert background.get_tile_size() == (tile_width, tile_height)
 
 
-def test_get_PIL_image_object_with_proper_dimensions(image) -> None:
-    pil_image = image.generate_image_background()
+def test_get_PIL_image_object_with_proper_dimensions(background) -> None:
+    pil_image = background.generate_image_background()
     assert isinstance(pil_image, PIL_Image)
-    assert pil_image.height == image.get_height()
-    assert pil_image.width == image.width
-    assert pil_image.width == image.width
+    assert pil_image.height == background.get_height()
+    assert pil_image.width == background.width
+    assert pil_image.width == background.width
 
 
-def test_create_Pattern_instance_success(image, schema) -> None:
-    image = image.generate_image_background()
+def test_create_Pattern_instance_success(background, schema) -> None:
     text = 'test'
     start_line_width = 3
     pattern = Pattern(
-        image=image,
+        background=background,
         schema=schema,
         text=text,
         start_line_width=start_line_width,
     )
-    assert pattern.image == image
+    assert pattern.image == background.generate_image_background()
     assert pattern.text == text
     assert pattern.start_line_width == start_line_width
 

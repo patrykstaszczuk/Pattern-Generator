@@ -24,6 +24,7 @@ class ImageBackground:
 
         self._tile_width = 0
         self._tile_height = 0
+        self.mapping = {item: 0 for item in self.schema.get_letters()}
         dir_path = os.path.dirname(os.path.realpath(__file__))
         font_name = "DejaVuSans.ttf"
         font_path = dir_path + '/fonts/' + font_name
@@ -48,36 +49,33 @@ class ImageBackground:
 
     def generate_image_background(self) -> PIL_Image:
         """ generate PIL image """
-        background = PIL_Image.new(
+        image = PIL_Image.new(
             'RGB',
             (self.width, self._height),
             color=self.color)
         self._map_letters_to_image()
         if self.with_mesh:
-            background = self._draw_mesh(background)
-        return background
+            image = self._draw_mesh(image)
+        return image
 
     def _map_letters_to_image(self) -> None:
         """ map letters to image pixels"""
         self._tile_width, self._tile_height = self.get_tile_size()
         tile_center = self._get_first_tile_center()
         x_start = tile_center[0]
-        mapping = self.schema.get_mapping()
 
-        for item, value in mapping.items():
-            mapping.update({item: [tile_center[0], tile_center[1]]})
+        for item, value in self.mapping.items():
+            self.mapping.update({item: [tile_center[0], tile_center[1]]})
             if self.width - self._tile_width < tile_center[0] + self._tile_width/2:
                 tile_center[0] = x_start
                 tile_center[1] += self._tile_height
             else:
                 tile_center[0] += self._tile_width
-        self.schema.set_mapping(mapping)
 
     def _draw_mesh(self, background: PIL_Image) -> PIL_Image:
         """ draw mesh on existing image based on mapping """
         draw = ImageDraw.Draw(background)
-        mapping = self.schema.get_mapping()
-        for item, value in mapping.items():
+        for item, value in self.mapping.items():
             draw.text(value, item, 'black', font=self.font)
             half_tile = self._tile_width/2
             draw.rectangle(
@@ -160,13 +158,14 @@ class ImageBackground:
 class Pattern:
     def __init__(
         self,
-        image: PIL_Image,
+        background: PIL_Image,
         schema: Schema,
         text: str,
         color: str = '#000000',
         start_line_width: int = None
     ) -> None:
-        self.image = image
+        self.background = background
+        self.image = self.background.generate_image_background()
         self.schema = schema
         self.text = text
         self.color = color
@@ -179,7 +178,7 @@ class Pattern:
     def draw(self) -> None:
         """ generate lines on given image based on provided parameters """
         draw = ImageDraw.Draw(self.image)
-        mapping = self.schema.get_mapping()
+        mapping = self.background.mapping
         existing_letter_pairs = {}
         for i, value in enumerate(self.text):
             if i == len(self.text) - 1:

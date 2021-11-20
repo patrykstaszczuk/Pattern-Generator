@@ -1,7 +1,6 @@
 setup.py
 pattern_generator/__init__.py
 pattern_generator/image.py
-pattern_generator/main.py
 pattern_generator/schemas.py
 pattern_generator.egg-info/PKG-INFO
 pattern_generator.egg-info/SOURCES.txt

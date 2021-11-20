@@ -32,20 +32,20 @@ class SimplePolishSchema(Schema):
         """ return all letters of schema in default order """
         return self.letters
 
-    def get_mapping(self) -> dict:
-        """ return current mapping or create default one """
-        if self.mapping is None:
-            return {item: (0, 0) for item in self.letters}
-        return self.mapping
+    # def get_mapping(self) -> dict:
+    #     """ return current mapping or create default one """
+    #     if self.mapping is None:
+    #         return {item: (0, 0) for item in self.letters}
+    #     return self.mapping
 
-    def set_mapping(self, new_mapping: dict) -> None:
-        """ set new mapping """
-        if not isinstance(new_mapping, dict):
-            raise TypeError('New mapping has to be dict type')
-        if len(new_mapping) != len(self.letters):
-            raise ValueError(
-                'New mapping must map all the letters of schema. Must be same lentgth')
-        self.mapping = new_mapping
+    # def set_mapping(self, new_mapping: dict) -> None:
+    #     """ set new mapping """
+    #     if not isinstance(new_mapping, dict):
+    #         raise TypeError('New mapping has to be dict type')
+    #     if len(new_mapping) != len(self.letters):
+    #         raise ValueError(
+    #             'New mapping must map all the letters of schema. Must be same lentgth')
+    #     self.mapping = new_mapping
 
     def get_length(self):
         """ retrun length of schema """

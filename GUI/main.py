@@ -120,7 +120,7 @@ class App(tk.Frame):
                 with_mesh=with_mesh,
                 num_of_colums=num_of_columns,
                 color=color,
-                ).generate_image_background()
+                )
             self.error_msg.grid_remove()
             self.disable_children(self.custom_settings_frame)
             self.enable_children(self.edit_button_frame)
@@ -130,10 +130,9 @@ class App(tk.Frame):
             self.error_msg.grid()
 
     def create_pattern(self, width: str, color: str, text: str) -> None:
-        background_copy = self.background.copy()
         try:
             self.pattern = Pattern(
-                image=background_copy,
+                background=self.background,
                 schema=self.schema,
                 text=text,
                 color=color,
