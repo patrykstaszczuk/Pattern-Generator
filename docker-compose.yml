@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  app:
+    container_name: fastapi
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    volumes:
+      - ./api/app:/code/app
+      - ./packages:/packages/
+    ports:
+      - "80:80"
