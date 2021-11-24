@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from unittest.mock import Mock, patch
 from .main import app
 
 
@@ -25,10 +26,11 @@ def test_creating_background_success() -> None:
             'color': '#000000',
             'start_line_width': 0,
         }}
-
-    response = client.post(
-        "/create-pattern",
-        json=params,
-        )
-    assert response.status_code == 201
-    assert type(response.content) == bytes
+    with patch('pattern_generator.image', 'ImageBackground') as mock:
+        response = client.post(
+            "/create-pattern",
+            json=params,
+            )
+        assert response.status_code == 201
+        assert type(response.content) == bytes
+        assert False

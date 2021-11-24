@@ -16,6 +16,7 @@ class App(tk.Frame):
 
         self.error_msg = tk.Label(self, text=f'', bg='red')
         self.succes_msg = tk.Label(self, text='', bg='green')
+
         self.background = None
         self.pattern = None
         self.schema = None
@@ -108,6 +109,7 @@ class App(tk.Frame):
         return custom_settings_frame
 
     def create_background(self, width: str, num_of_columns: str, with_mesh: str, color: str, schema: str) -> None:
+
         self.schema = SimplePolishSchema()
         if with_mesh.upper() == 'YES':
             with_mesh = True

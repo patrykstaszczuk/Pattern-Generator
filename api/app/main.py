@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
@@ -37,7 +37,7 @@ class Background(BaseModel):
 class PatternModel(BaseModel):
     text: str
     color: str
-    start_line_width: int
+    start_line_width: str
 
 
 @app.get("/")
@@ -54,8 +54,8 @@ async def schemas():
 
 
 @app.post("/create-pattern", response_class=FileResponse, status_code=201)
-async def background(background: Background, pattern: PatternModel):
-
+async def background(background: Background, pattern: PatternModel, request: Request):
+    print(await request.json())
     schema = SimplePolishSchema()
 
     image_background = ImageBackground(
@@ -65,15 +65,14 @@ async def background(background: Background, pattern: PatternModel):
         color=background.color,
         with_mesh=background.with_mesh
     )
-
     image_background_path = os.path.dirname(os.path.realpath(
         __file__)) + "/media/background.jpg"
     pil_image = image_background.generate_image_background()
     pil_image.save(image_background_path, quality=100)
 
     pattern = Pattern(
-        image=pil_image,
-        schema=image_background.schema,
+        background=image_background,
+        schema=schema,
         text=pattern.text,
         color=pattern.color,
         start_line_width=pattern.start_line_width,
