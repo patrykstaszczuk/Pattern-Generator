@@ -83,15 +83,37 @@ def test_creating_image_with_invalid_number_of_columns(image_params) -> None:
         ImageBackground(**image_params)
 
 
-@patch('PIL.ImageFont.truetype')
-def test_creating_image_with_non_defaults_background_color(mock_font, image_params) -> None:
+def test_creating_image_with_non_defaults_background_color(image_params) -> None:
     image_params.update({'color': '#5a5795'})
     image = ImageBackground(**image_params)
     assert image.color == image_params['color']
 
 
-@patch('PIL.ImageFont.truetype')
-def test_background_height_should_be_calculated_dynamically(mock, image_params) -> None:
+def test_creating_image_with_invalid_background_color_failed(image_params) -> None:
+    image_params.update({'color': 'dsadsadas'})
+    with pytest.raises(ValueError):
+        ImageBackground(**image_params)
+    image_params.update({'color': 1233})
+    with pytest.raises(ValueError):
+        ImageBackground(**image_params)
+
+
+def test_creating_image_with_non_default_mesh_color(image_params) -> None:
+    image_params.update({'mesh_color': '#5a5795'})
+    image = ImageBackground(**image_params)
+    assert image.mesh_color == image_params['mesh_color']
+
+
+def test_creating_image_with_invalid_mesh_color_failed(image_params) -> None:
+    image_params.update({'mesh_color': 'dsadsadas'})
+    with pytest.raises(ValueError):
+        ImageBackground(**image_params)
+    image_params.update({'mesh_color': 1233})
+    with pytest.raises(ValueError):
+        ImageBackground(**image_params)
+
+
+def test_background_height_should_be_calculated_dynamically(image_params) -> None:
     image_params['num_of_colums'] = 9
     image = ImageBackground(**image_params)
 

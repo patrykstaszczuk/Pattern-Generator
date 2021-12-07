@@ -13,12 +13,14 @@ class ImageBackground:
         schema: Schema,
         num_of_colums: int,
         color: str = '#FFFFFF',
+        mesh_color: str = '#000000',
         with_mesh: bool = False,
     ) -> None:
         self.width = width
         self.schema = schema
         self.num_of_colums = num_of_colums
         self.with_mesh = with_mesh
+        self.mesh_color = mesh_color
         self.color = color
         self._height = self._calculate_image_height()
 
@@ -76,12 +78,12 @@ class ImageBackground:
         """ draw mesh on existing image based on mapping """
         draw = ImageDraw.Draw(background)
         for item, value in self.mapping.items():
-            draw.text(value, item, 'black', font=self.font)
+            draw.text(value, item, self.mesh_color, font=self.font)
             half_tile = self._tile_width/2
             draw.rectangle(
                 (value[0]-half_tile,  value[1]-half_tile,
                  value[0]+half_tile, value[1]+half_tile),
-                outline='black', width=1)
+                outline=self.mesh_color, width=1)
         return background
 
     def _get_first_tile_center(self) -> tuple[int, int]:
@@ -114,15 +116,23 @@ class ImageBackground:
     def color(self) -> bool:
         return self._color
 
+    @property
+    def mesh_color(self) -> str:
+        return self._mesh_color
+
+    def _validate_hex(self, value: str) -> bool:
+        if not isinstance(value, str) or not re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', value):
+            raise ValueError('Please provide color in right hex format')
+
     @color.setter
     def color(self, value) -> bool:
-        if len(value) == 0:
-            self._color = '#FFFFFF'
-            return
-        match = re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', value)
-        if not match:
-            raise ValueError('Please provide color in right hex format')
+        self._validate_hex(value)
         self._color = value
+
+    @mesh_color.setter
+    def mesh_color(self, value) -> bool:
+        self._validate_hex(value)
+        self._mesh_color = value
 
     @width.setter
     def width(self, value) -> None:
