@@ -5,6 +5,7 @@ from tkinter import (
     Label,
     Button,
     Frame,
+    Toplevel,
     IntVar,
     StringVar,
     OptionMenu,
@@ -54,6 +55,9 @@ class PatternGenerator:
             self.pattern_settings.frame, pady=10, padx=30, text='Save')
         self.save_image_button['command'] = lambda: self.save_the_image()
 
+        self.pattern_settings.continous_reading_button['command'] = lambda: self.live_patter_creation(
+        )
+
     def create_background(
             self,
             width: str,
@@ -97,12 +101,12 @@ class PatternGenerator:
                 start_line_width=width
             )
             self.display_image(self.pattern_image.frame, self.pattern.draw())
-            self.save_image_button.grid(row=5)
+            self.save_image_button.grid(row=5, column=1)
             self.pattern_settings.msg.grid_remove()
         except Exception as e:
             self.pattern_settings.msg.grid_remove()
             self.pattern_settings.msg['text'] = f'{e}'
-            self.pattern_settings.msg.grid()
+            self.pattern_settings.msg.grid(row=6, columnspan=2)
 
     def display_image(self, frame: Frame, image: Image) -> None:
         self.remove_children(frame)
@@ -139,6 +143,40 @@ class PatternGenerator:
     def remove_children(self, parent) -> None:
         for child in parent.winfo_children():
             child.destroy()
+
+    def live_patter_creation(self) -> None:
+        if self.pattern_settings.generate_button['state'] == 'disabled':
+            self.pattern_settings.generate_button['state'] = 'normal'
+            self.pattern_settings.text_var.trace_remove(
+                *self.pattern_settings.text_var.trace_info()[0])
+            self.pattern_settings.continous_reading_button['highlightbackground'] = 'red'
+        else:
+            self.pattern_settings.continous_reading_button['highlightbackground'] = 'green'
+            self.pattern_settings.generate_button['state'] = 'disable'
+            self.pattern_settings.text_var.trace_add(
+                'write', self.text_callback)
+
+    def text_callback(self, *args):
+        self.create_pattern(
+            self.pattern_settings.width.get(),
+            self.pattern_settings.color.get(),
+            self.pattern_settings.text_box.get()
+            )
+
+
+# class ImageWindow(Toplevel):
+#     def __init__(self, master: Tk = None) -> None:
+#         super().__init__(master=master)
+#         self.geometry('400x400')
+#         # self.xE = StringVar()
+#         # entry = Entry(self, textvariable=self.xE)
+#         # entry.grid(pady=5, padx=10)
+#         # self.xE.trace("w", self.callback)  # "w"  is a write argument
+#
+#         self.xl = StringVar()
+#         lab = Label(self, textvariable=self.xl)
+#         self.xl.set(" the input display ")
+#         lab.grid(pady=5, padx=10)
 
 
 root = Tk()

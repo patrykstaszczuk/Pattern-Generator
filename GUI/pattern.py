@@ -32,17 +32,23 @@ class PatternSettings:
 
         Label(self.frame,
               text='Type your text here...').grid(row=2, column=0, pady=10)
-        self.text_box = Entry(self.frame, state='normal')
+        self.text_var = StringVar()
+        self.text_box = Entry(self.frame, state='normal',
+                              textvariable=self.text_var)
         self.text_box.grid(row=2, column=1)
         self.text_box.name = 'text'
-        Label(self.frame, pady=20).grid(row=3)
+
+        self.continous_reading_button = Button(
+            self.frame, pady=10, padx=30, text='Live', highlightbackground = 'red')
+        self.continous_reading_button.grid(row=3, column=0)
+
         self.generate_button = Button(self.frame, text='Generate pattern',
                                       padx=10, pady=10)
-        self.generate_button.grid(row=4, column=0)
+        self.generate_button.grid(row=3, column=1)
         self.edit_button = Button(self.frame, text='Edit background settings',
                                   pady=10, padx=10)
-        self.edit_button.grid(row=4, column=1)
-        Label(self.frame, pady=20).grid(row=5)
+        Label(self.frame).grid(row=4, columnspan=2)
+        self.edit_button.grid(row=5, column=0)
 
 
 class PatternImage:
