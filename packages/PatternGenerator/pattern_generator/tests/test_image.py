@@ -33,6 +33,7 @@ def background(image_params) -> ImageBackground:
 def pattern_params(background, schema) -> dict:
     return {
         'background': background,
+        'image': background.generate_image_background(),
         'schema': schema,
         'text': 'test',
         'start_line_width': 3,
@@ -145,6 +146,7 @@ def test_create_Pattern_instance_success(background, schema) -> None:
     start_line_width = 3
     pattern = Pattern(
         background=background,
+        image=background.generate_image_background(),
         schema=schema,
         text=text,
         start_line_width=start_line_width,

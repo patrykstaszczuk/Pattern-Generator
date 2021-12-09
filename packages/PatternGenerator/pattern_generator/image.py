@@ -122,7 +122,7 @@ class ImageBackground:
 
     def _validate_hex(self, value: str) -> bool:
         if not isinstance(value, str) or not re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', value):
-            raise ValueError('Please provide color in right hex format')
+            raise ValueError('Please provide color in correct hex format')
 
     @color.setter
     def color(self, value) -> bool:
@@ -168,14 +168,16 @@ class ImageBackground:
 class Pattern:
     def __init__(
         self,
-        background: PIL_Image,
+        background: ImageBackground,
+        image: PIL_Image,
         schema: Schema,
-        text: str,
+        text: str = '',
         color: str = '#000000',
-        start_line_width: int = None
+        start_line_width: int = 0
     ) -> None:
         self.background = background
-        self.image = self.background.generate_image_background()
+        self.image = image
+        self.original_background = image.copy()
         self.schema = schema
         self.text = text
         self.color = color
@@ -242,7 +244,7 @@ class Pattern:
             return
         match = re.search(r'^#(?:[0-9a-fA-F]{3}){1,2}$', value)
         if not match:
-            raise ValueError('Please provide color in right hex format')
+            raise ValueError('Please provide color in correct hex format')
         self._color = value
 
     @start_line_width.setter

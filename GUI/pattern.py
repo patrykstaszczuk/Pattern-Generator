@@ -39,7 +39,7 @@ class PatternSettings:
         self.text_box.name = 'text'
 
         self.continous_reading_button = Button(
-            self.frame, pady=10, padx=30, text='Live', highlightbackground = 'red')
+            self.frame, pady=10, padx=30, text='Live', highlightbackground='red')
         self.continous_reading_button.grid(row=3, column=0)
 
         self.generate_button = Button(self.frame, text='Generate pattern',

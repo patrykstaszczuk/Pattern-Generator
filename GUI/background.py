@@ -34,7 +34,7 @@ class BackgroundSettings:
         Label(self.frame,
               text='With mesh: ').grid(row=2, column=0, sticky='w', pady=10)
         self.with_mesh_input = StringVar()
-        self.with_mesh_input.set('yes')
+        self.with_mesh_input.set('no')
         self.with_mesh = Entry(self.frame,
                                textvariable=self.with_mesh_input, width=15)
         self.with_mesh.grid(row=2, column=1, sticky='e')
