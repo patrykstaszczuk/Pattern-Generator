@@ -5,11 +5,6 @@ from tkinter import (
     Label,
     Button,
     Frame,
-    Toplevel,
-    IntVar,
-    StringVar,
-    OptionMenu,
-    Entry
     )
 from PIL import Image, ImageTk
 
@@ -19,33 +14,38 @@ from pattern import PatternImage, PatternSettings
 
 
 class PatternGenerator:
-    def __init__(self, master):
+    def __init__(
+            self,
+            master: Tk,
+            bg_settings: BackgroundSettings,
+            bg_image: BackgroundImage,
+            pattern_settings: PatternSettings,
+            pattern_image: PatternImage,
+            ):
         self.master = master
-        master.title("Pattern Generator")
-        master.geometry('800x800')
+        self.bg_settings = bg_settings
+        self.bg_image = bg_image
+        self.pattern_settings = pattern_settings
+        self.pattern_image = pattern_image
 
-        self.bg_settings = BackgroundSettings(master)
-        self.bg_image = BackgroundImage(master)
-
-        self.pattern_settings = PatternSettings(master)
-        self.pattern_image = PatternImage(master)
-
-        self.set_initial_state_for_frames()
-
-        self.bind_background_setting_apply_button()
-        self.bind_pattern_settings_edit_button()
-        self.bind_pattern_settings_generate_button()
-        self.bind_live_writing_button()
-
-        self.save_image_button = Button(
+        self.save_image_btn = Button(
             self.pattern_settings.frame, pady=10, padx=30, text='Save', state='disable')
-        self.save_image_button.grid(row=5, column=1)
-        self.bind_save_image_button()
+        self.save_image_btn.grid(row=5, column=1)
 
-    def set_initial_state_for_frames(self) -> None:
+        master.title("Pattern Generator")
+        master.geometry('850x800')
+
+        self.set_initial_state_for_pattern_settings_frame()
+        self.bind_bg_setting_apply_btn()
+        self.bind_edit_background_btn()
+        self.bind_pattern_settings_generate_btn()
+        self.bind_live_writing_btn()
+        self.bind_save_image_btn()
+
+    def set_initial_state_for_pattern_settings_frame(self) -> None:
         self.disable_children(self.pattern_settings.frame)
 
-    def bind_background_setting_apply_button(self) -> None:
+    def bind_bg_setting_apply_btn(self) -> None:
         self.bg_settings.apply_button['command'] = \
             lambda: self.create_background(
                 self.bg_settings.width.get(),
@@ -55,25 +55,27 @@ class PatternGenerator:
                 self.bg_settings.mesh_color.get(),
                 self.bg_settings.schema_input.get())
 
-    def bind_pattern_settings_edit_button(self) -> None:
-        self.pattern_settings.edit_button['command'] = \
+    def bind_edit_background_btn(self) -> None:
+        self.bg_settings.edit_background_btn['command'] = \
             lambda: [
                 self.enable_children(self.bg_settings.frame),
+                self.disable_widget(self.bg_settings.edit_background_btn),
                 self.disable_children(self.pattern_settings.frame),
+
                 ]
 
-    def bind_pattern_settings_generate_button(self) -> None:
-        self.pattern_settings.generate_button['command'] = \
+    def bind_pattern_settings_generate_btn(self) -> None:
+        self.pattern_settings.pattern_preview_btn['command'] = \
             lambda: [
                self.create_pattern()
                ]
 
-    def bind_live_writing_button(self) -> None:
-        self.pattern_settings.continous_reading_button['command'] = \
+    def bind_live_writing_btn(self) -> None:
+        self.pattern_settings.continous_reading_btn['command'] = \
             lambda: self.live_pattern_creation()
 
-    def bind_save_image_button(self) -> None:
-        self.save_image_button['command'] = lambda: self.save_the_image()
+    def bind_save_image_btn(self) -> None:
+        self.save_image_btn['command'] = lambda: self.save_the_image()
 
     def create_background(
             self, width: str, num_of_columns: str, with_mesh: str,
@@ -96,7 +98,7 @@ class PatternGenerator:
                 color=color,
                 )
             self.clear_errors(self.bg_settings.error_msg)
-        except Exception as e:
+        except ValueError as e:
             self.show_errors(self.bg_settings.error_msg, e)
             return
 
@@ -104,7 +106,9 @@ class PatternGenerator:
                            self.background.generate_image_background())
         self.disable_children(self.bg_settings.frame)
         self.enable_children(self.pattern_settings.frame)
-        self.disable_save_button()
+
+        self.enable_widget(self.bg_settings.edit_background_btn)
+        self.disable_widget(self.save_image_btn)
         self.deactivate_live_button()
         self.init_pattern()
 
@@ -125,9 +129,9 @@ class PatternGenerator:
             setattr(self.pattern, 'start_line_width', start_line_width)
             setattr(self.pattern, 'color', color)
             setattr(self.pattern, 'text', text)
-            self.enable_save_button()
+            self.enable_widget(self.save_image_btn)
             self.clear_errors(self.pattern_settings.msg)
-        except Exception as e:
+        except ValueError as e:
             self.show_errors(self.pattern_settings.msg, e)
             self.disable_save_button()
 
@@ -141,12 +145,6 @@ class PatternGenerator:
         label = Label(frame, image=img)
         label.image = img
         label.grid()
-
-    def enable_save_button(self) -> None:
-        self.save_image_button['state'] = 'normal'
-
-    def disable_save_button(self) -> None:
-        self.save_image_button['state'] = 'disable'
 
     def clear_errors(self, label: Label) -> None:
         label.grid_remove()
@@ -162,7 +160,7 @@ class PatternGenerator:
         self.pattern_settings.msg['text'] = 'Pattern generated on the Desktop, under the pattern.jpg name'
         self.pattern_settings.msg.grid(columnspan=2)
 
-    def disable_children(self, parent):
+    def disable_children(self, parent: Frame) -> None:
         for child in parent.winfo_children():
             wtype = child.winfo_class()
             if wtype not in ('Frame', 'Labelframe'):
@@ -170,7 +168,7 @@ class PatternGenerator:
             else:
                 self.disable_children(child)
 
-    def enable_children(self, parent):
+    def enable_children(self, parent: Frame) -> None:
         for child in parent.winfo_children():
             wtype = child.winfo_class()
             if wtype not in ('Frame', 'Labelframe'):
@@ -178,40 +176,53 @@ class PatternGenerator:
             else:
                 self.enable_children(child)
 
+    def enable_widget(self, widget) -> None:
+        widget['state'] = 'normal'
+
+    def disable_widget(self, widget) -> None:
+        widget['state'] = 'disable'
+
     def remove_children(self, parent) -> None:
         for child in parent.winfo_children():
             child.destroy()
 
     def live_pattern_creation(self) -> None:
-        if self.pattern_settings.generate_button['state'] == 'disabled':
-            self.activate_generate_button()
+        if self.pattern_settings.pattern_preview_btn['state'] == 'disabled':
+            self.enable_widget(self.pattern_settings.pattern_preview_btn)
             self.deactivate_live_button()
         else:
             self.activate_live_button()
-            self.deactivate_generate_button()
+            self.disable_widget(self.pattern_settings.pattern_preview_btn)
 
     def deactivate_live_button(self) -> None:
         traces = self.pattern_settings.text_var.trace_info()
         if not traces:
             return
         self.pattern_settings.text_var.trace_remove(*traces[0])
-        self.pattern_settings.continous_reading_button['highlightbackground'] = 'red'
-
-    def deactivate_generate_button(self) -> None:
-        self.pattern_settings.generate_button['state'] = 'disable'
+        self.pattern_settings.continous_reading_btn['highlightbackground'] = 'red'
 
     def activate_live_button(self) -> None:
-        self.pattern_settings.continous_reading_button['highlightbackground'] = 'green'
+        self.pattern_settings.continous_reading_btn['highlightbackground'] = 'green'
         self.pattern_settings.text_var.trace_add(
             'write', self.text_callback)
 
     def text_callback(self, *args):
         self.create_pattern()
 
-    def activate_generate_button(self) -> None:
-        self.pattern_settings.generate_button['state'] = 'normal'
 
+if __name__ == '__main__':
+    root = Tk()
+    bg_settings = BackgroundSettings(root)
+    bg_image_preview_frame = BackgroundImage(root)
 
-root = Tk()
-my_gui = PatternGenerator(root)
-root.mainloop()
+    pattern_settings = PatternSettings(root)
+    pattern_preview_frame = PatternImage(root)
+
+    my_gui = PatternGenerator(
+        root,
+        bg_settings,
+        bg_image_preview_frame,
+        pattern_settings,
+        pattern_preview_frame,
+        )
+    root.mainloop()
