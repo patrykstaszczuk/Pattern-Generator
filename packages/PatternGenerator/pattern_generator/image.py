@@ -202,11 +202,11 @@ class Pattern:
             pair = self.text[i] + self.text[i+1]
             if pair in list(existing_letter_pairs.keys()):
                 existing_letter_pairs.update(
-                    {pair: existing_letter_pairs[pair] + 1})
+                    {pair: existing_letter_pairs[pair] + self.start_line_width*2})
                 width = existing_letter_pairs[pair]
             elif pair[::-1] in list(existing_letter_pairs.keys()):
                 existing_letter_pairs.update(
-                    {pair[::-1]: existing_letter_pairs[pair[::-1]] + 10})
+                    {pair[::-1]: existing_letter_pairs[pair[::-1]] + self.start_line_width*2})
                 width = existing_letter_pairs[pair[::-1]]
             else:
                 existing_letter_pairs.update({pair: 1})
