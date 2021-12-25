@@ -151,7 +151,7 @@ class ImageBackground:
             value = int(value)
         except ValueError:
             raise ValueError('Num of columns must must be a number')
-        if not 0 < value < self.schema.get_length():
+        if not 0 < value <= self.schema.get_length():
             raise ValueError(
                 f'Number of columns must be a value between 0 and {self.schema.get_length()}')
         self._num_of_colums = value
