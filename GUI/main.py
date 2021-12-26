@@ -28,8 +28,9 @@ class PatternGenerator:
             ):
         self.master = master
         master.title("Pattern Generator")
-        master.maxsize(850, 800)
-
+        self.width = master.winfo_screenwidth()
+        self.height = master.winfo_screenheight()
+        master.geometry(f'{self.width}x{self.height}')
         self.settings_frame = settings_frame
         self.drawing_frame = drawing_frame
 
@@ -37,7 +38,6 @@ class PatternGenerator:
         self.bg_image = bg_image
         self.pattern_settings = pattern_settings
         self.pattern_image = pattern_image
-        self.invoke_create_background()
 
         self.save_settings_btn = Button(
             self.pattern_settings.frame, pady=10, padx=30, text='Save', state='disable')
@@ -51,15 +51,15 @@ class PatternGenerator:
         self.pattern_image.print_btn['command'] = lambda: self.print_the_pattern(
         )
 
-        self.drawing_frame.grid()
-
+        self.drawing_frame.pack()
+        self.invoke_create_background()
         self.enable_widget(self.save_settings_btn)
         self.bind_bg_setting_apply_btn()
         self.bind_edit_background_btn()
         self.bind_save_settings_button()
 
     def show_config(self) -> None:
-        self.drawing_frame.grid_remove()
+        self.drawing_frame.pack_forget()
         self.settings_frame.grid()
 
     def print_the_pattern(self) -> None:
@@ -74,7 +74,7 @@ class PatternGenerator:
 
     def show_drawing_frame(self) -> None:
         self.settings_frame.grid_remove()
-        self.drawing_frame.grid()
+        self.drawing_frame.pack()
 
     def bind_bg_setting_apply_btn(self) -> None:
         self.bg_settings.apply_button['command'] = \
@@ -134,8 +134,12 @@ class PatternGenerator:
             self.show_info(self.bg_settings.error_msg, e)
             return
 
-        self.display_image(self.bg_image.frame,
-                           self.background.generate_image_background())
+        self.display_image(
+            self.bg_image.frame,
+            self.background.generate_image_background(),
+            self.width//3,
+            self.height//3
+            )
         self.disable_children(self.bg_settings.frame)
         self.enable_children(self.pattern_settings.frame)
 
@@ -164,7 +168,7 @@ class PatternGenerator:
             self.show_info(self.pattern_image.msg, e, 'red')
         self.pattern.image = self.pattern.original_background.copy()
         self.display_image(
-            self.pattern_image.frame,
+            self.pattern_image.drawing_area,
             self.pattern.draw(),
             600,
             600

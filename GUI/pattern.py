@@ -4,8 +4,10 @@ from tkinter import (
     Frame,
     IntVar,
     StringVar,
-    Entry
+    Entry,
+    PhotoImage
     )
+from PIL import ImageTk
 
 
 class PatternSettings:
@@ -53,10 +55,22 @@ class PatternSettings:
 
 class PatternImage:
     def __init__(self, master):
-        self.frame = Frame(master, width=600, height=600,
-                           relief='solid', borderwidth='1')
+        setting_icon = ImageTk.PhotoImage(file='GUI/setting-icon.png')
+        self.config_btn = Button(master, state='normal',
+                                 image=setting_icon,
+                                 width=12,
+                                 height=12,
+                                 )
+        self.config_btn.image = setting_icon
+        self.config_btn.grid(row=0, column=3)
+        self.width = master.winfo_screenwidth()
+        self.height = master.winfo_screenheight()
+        self.drawing_area = Frame(master, width=600, height=600,
+                                  # relief='solid',
+                                  # borderwidth='1'
+                                  )
+        self.drawing_area.grid(row=1, pady=10, columnspan=2)
 
-        self.frame.grid(row=1, columnspan=2, pady=10, padx=120)
         self.msg = Label(master)
         self.msg.grid(row=5)
 
@@ -69,10 +83,7 @@ class PatternImage:
 
         buttons_frame = Frame(master)
         buttons_frame.grid(row=4, columnspan=2, pady=5)
-        self.config_btn = Button(buttons_frame, pady=10, padx=20,
-                                 text='Config', state='normal',
-                                 )
-        self.config_btn.grid(row=0, column=0)
+
         self.save_image_btn = Button(buttons_frame, pady=10, padx=20,
                                      text='Save', state='normal',
                                      )

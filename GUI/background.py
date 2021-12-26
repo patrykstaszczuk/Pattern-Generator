@@ -75,5 +75,5 @@ class BackgroundSettings:
 
 class BackgroundImage:
     def __init__(self, master):
-        self.frame = Frame(master, width=600, height=600)
+        self.frame = Frame(master)
         self.frame.grid(row=0, column=1, pady=5)
