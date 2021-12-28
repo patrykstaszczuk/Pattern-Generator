@@ -12,7 +12,7 @@ from tkinter import (
 class BackgroundSettings:
     def __init__(self, master):
         self.frame = Frame(master)
-        self.frame.grid(row=0, column=0, padx=25, pady=5)
+        self.frame.grid(row=1, column=0, pady=5, padx=10)
 
         self.error_msg = Label(self.frame)
 
@@ -76,4 +76,4 @@ class BackgroundSettings:
 class BackgroundImage:
     def __init__(self, master):
         self.frame = Frame(master)
-        self.frame.grid(row=0, column=1, pady=5)
+        self.frame.grid(row=3)

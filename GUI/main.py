@@ -19,39 +19,53 @@ class PatternGenerator:
     def __init__(
             self,
             master: Tk,
-            settings_frame,
-            drawing_frame,
-            bg_settings: BackgroundSettings,
-            bg_image: BackgroundImage,
-            pattern_settings: PatternSettings,
-            pattern_image: PatternImage,
             ):
         self.master = master
         master.title("Pattern Generator")
         self.width = master.winfo_screenwidth()
         self.height = master.winfo_screenheight()
         master.geometry(f'{self.width}x{self.height}')
-        self.settings_frame = settings_frame
-        self.drawing_frame = drawing_frame
 
-        self.bg_settings = bg_settings
-        self.bg_image = bg_image
-        self.pattern_settings = pattern_settings
-        self.pattern_image = pattern_image
+        self.settings_frame = Frame(
+            self.master, width=(self.width//4) - 10, height=self.height)
+        self.drawing_frame = Frame(
+            self.master, width=(self.width//2) - 10, height=self.height)
+        self.right_frame = Frame(
+            self.master, width=(self.width//4) - 10, height=self.height)
+
+        self.bg_settings = BackgroundSettings(self.settings_frame)
+        self.pattern_settings = PatternSettings(self.settings_frame)
+        self.pattern_image = PatternImage(self.drawing_frame)
 
         self.save_settings_btn = Button(
-            self.pattern_settings.frame, pady=10, padx=30, text='Save', state='disable')
-        self.save_settings_btn.grid(row=5, column=1)
+            self.settings_frame, pady=10, padx=30, text='Save', state='disable')
+        self.save_settings_btn.grid(row=3)
+
+        setting_icon = ImageTk.PhotoImage(file='GUI/setting-icon.png')
+        self.config_btn = Button(self.settings_frame, state='normal',
+                                 image=setting_icon,
+                                 width=12,
+                                 height=12,
+                                 )
+        self.config_btn.image = setting_icon
+        self.config_btn.grid(row=0, sticky='w')
 
         self.pattern_image.text_var.trace_add(
             'write', self.text_callback)
-        self.pattern_image.config_btn['command'] = lambda: self.show_config()
+        self.config_btn['command'] = lambda: self.show_config()
         self.pattern_image.save_image_btn['command'] = lambda: self.save_the_image(
         )
         self.pattern_image.print_btn['command'] = lambda: self.print_the_pattern(
         )
 
-        self.drawing_frame.pack()
+        self.settings_frame.grid(row=0, column=1, padx=5)
+        self.settings_frame.grid_propagate(0)
+        self.drawing_frame.grid(row=0, column=2, padx=5)
+        self.drawing_frame.grid_propagate(0)
+        self.right_frame.grid(row=0, column=3, padx=5)
+        self.right_frame.grid_propagate(0)
+
+        self.show_drawing_frame()
         self.invoke_create_background()
         self.enable_widget(self.save_settings_btn)
         self.bind_bg_setting_apply_btn()
@@ -60,21 +74,18 @@ class PatternGenerator:
 
     def show_config(self) -> None:
         self.drawing_frame.pack_forget()
-        self.settings_frame.grid()
+        self.bg_settings.frame.grid()
+        self.save_settings_btn.grid()
+        self.pattern_settings.frame.grid()
 
     def print_the_pattern(self) -> None:
         pass
-        # lpr = subprocess.Popen("/usr/bin/lpr", stdin=subprocess.PIPE)
-        # print(vars(lpr))
-        # image = self.pattern.draw()
-        # img_byte_arr = io.BytesIO()
-        # image.save(img_byte_arr, format='PNG')
-        # img_byte_arr = img_byte_arr.getvalue()
-        # lpr.stdin.write(img_byte_arr)
 
     def show_drawing_frame(self) -> None:
-        self.settings_frame.grid_remove()
-        self.drawing_frame.pack()
+        self.bg_settings.frame.grid_remove()
+        self.pattern_settings.frame.grid_remove()
+        self.save_settings_btn.grid_remove()
+        self.drawing_frame.grid()
 
     def bind_bg_setting_apply_btn(self) -> None:
         self.bg_settings.apply_button['command'] = \
@@ -133,13 +144,6 @@ class PatternGenerator:
         except ValueError as e:
             self.show_info(self.bg_settings.error_msg, e)
             return
-
-        self.display_image(
-            self.bg_image.frame,
-            self.background.generate_image_background(),
-            self.width//3,
-            self.height//3
-            )
         self.disable_children(self.bg_settings.frame)
         self.enable_children(self.pattern_settings.frame)
 
@@ -170,8 +174,8 @@ class PatternGenerator:
         self.display_image(
             self.pattern_image.drawing_area,
             self.pattern.draw(),
-            600,
-            600
+            self.pattern_image.width,
+            self.pattern_image.width
             )
 
     def display_image(self,
@@ -234,22 +238,7 @@ class PatternGenerator:
 if __name__ == '__main__':
     root = Tk()
 
-    settings_frame = Frame(root)
-    drawing_frame = Frame(root)
-
-    bg_settings = BackgroundSettings(settings_frame)
-    bg_image_preview_frame = BackgroundImage(settings_frame)
-
-    pattern_settings = PatternSettings(settings_frame)
-    pattern_preview_frame = PatternImage(drawing_frame)
-
     my_gui = PatternGenerator(
         root,
-        settings_frame,
-        drawing_frame,
-        bg_settings,
-        bg_image_preview_frame,
-        pattern_settings,
-        pattern_preview_frame,
         )
     root.mainloop()
