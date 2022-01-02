@@ -18,27 +18,28 @@ class PatternSettings:
 
         Label(self.frame,
               text='Pattern line width: ').grid(row=0, column=0, pady=10)
-        width_input = IntVar()
-        width_input.set(0)
-        self.width = Entry(self.frame, textvariable=width_input)
+        self.width_input = IntVar()
+
+        self.width = Entry(self.frame, textvariable=self.width_input)
         self.width.grid(row=0, column=1)
         self.width.name = 'width'
         Label(self.frame,
               text='Line color: ').grid(row=1, column=0, pady=10)
-        color_input = StringVar()
-        color_input.set('#000000')
-        self.color = Entry(self.frame, textvariable=color_input)
+        self.color_input = StringVar()
+        self.color = Entry(self.frame, textvariable=self.color_input)
         self.color.grid(row=1, column=1)
         self.color.name = 'color'
+        self.set_default_values()
+
+    def set_default_values(self) -> None:
+        self.width_input.set(0)
+        self.color_input.set('#000000')
 
 
 class PatternImage:
     def __init__(self, master):
         self.width = int(master.winfo_screenwidth()//2.3)
-        self.drawing_area = Frame(master, width=self.width, height=self.width,
-                                  # relief='solid',
-                                  # borderwidth='1',
-                                  )
+        self.drawing_area = Frame(master, width=self.width, height=self.width)
         self.drawing_area.grid(row=1, columnspan=2, pady=10, padx=50)
         self.drawing_area.grid_propagate(0)
 

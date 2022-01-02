@@ -44,6 +44,7 @@ class PatternGenerator:
         self.right_frame.grid_propagate(0)
 
         self.set_save_settings_button()
+        self.set_default_settingds_button()
         self.set_config_button()
         self.configure_pattern_image_buttons()
         self.show_drawing_frame()
@@ -51,12 +52,18 @@ class PatternGenerator:
         self.enable_widget(self.save_settings_btn)
         self.bind_bg_setting_apply_btn()
         self.bind_edit_background_btn()
-        self.bind_save_settings_btn()
 
     def set_save_settings_button(self) -> None:
         self.save_settings_btn = Button(
             self.settings_frame, pady=10, padx=30, text='Save', state='disable')
-        self.save_settings_btn.grid(row=3)
+        self.save_settings_btn.grid(row=3, column=0, sticky='e')
+        self.bind_save_settings_button()
+
+    def set_default_settingds_button(self) -> None:
+        self.default_settings_btn = Button(
+            self.settings_frame, pady=10, padx=20, text='Restore default')
+        self.default_settings_btn.grid(row=3, column=0, sticky='w')
+        self.bind_restore_default_button()
 
     def set_config_button(self) -> None:
         icon_path = self.get_icon_path()
@@ -86,7 +93,8 @@ class PatternGenerator:
         self.img_background_settings.frame.grid_remove()
         self.pattern_settings.frame.grid_remove()
         self.save_settings_btn.grid_remove()
-        self.drawing_frame.grid()
+        self.default_settings_btn.grid_remove()
+        self.enable_children(self.drawing_frame)
 
     def invoke_create_background(self) -> None:
         self.create_background(
@@ -98,9 +106,10 @@ class PatternGenerator:
             self.img_background_settings.schema_input.get())
 
     def show_config(self) -> None:
-        self.drawing_frame.pack_forget()
+        self.disable_children(self.drawing_frame)
         self.img_background_settings.frame.grid()
         self.save_settings_btn.grid()
+        self.default_settings_btn.grid()
         self.pattern_settings.frame.grid()
 
     def print_the_pattern(self) -> None:
@@ -126,10 +135,17 @@ class PatternGenerator:
                self.create_pattern()
                ]
 
-    def bind_save_settings_btn(self) -> None:
+    def bind_save_settings_button(self) -> None:
         self.save_settings_btn['command'] = lambda: [
             self.create_pattern(),
             self.show_drawing_frame()]
+
+    def bind_restore_default_button(self) -> None:
+        self.default_settings_btn['command'] = lambda: [
+            self.img_background_settings.set_default_values(),
+            self.pattern_settings.set_default_values(),
+            self.invoke_create_background()
+        ]
 
     def create_background(
             self, width: str, num_of_columns: str, with_mesh: str,
