@@ -71,6 +71,9 @@ class PatternGenerator:
         self.config_btn['command'] = lambda: self.show_config()
 
     def configure_pattern_image_buttons(self) -> None:
+        self.pattern_image.clear_text_btn['command'] = \
+            lambda: [self.pattern_image.clear_text(),
+                     self.create_pattern()]
         self.pattern_image.text_var.trace_add(
             'write', self.text_callback)
 

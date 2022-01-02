@@ -7,7 +7,6 @@ from tkinter import (
     Entry,
     PhotoImage
     )
-from PIL import ImageTk
 
 
 class PatternSettings:
@@ -40,21 +39,24 @@ class PatternImage:
                                   # relief='solid',
                                   # borderwidth='1',
                                   )
-        self.drawing_area.grid(pady=10, padx=50)
+        self.drawing_area.grid(row=1, columnspan=2, pady=10, padx=50)
         self.drawing_area.grid_propagate(0)
 
         self.msg = Label(master)
-        self.msg.grid(row=5)
+        self.msg.grid(row=5, columnspan=2)
 
         Label(master,
-              text='Type your text here...').grid(row=2)
+              text='Type your text here...').grid(row=2, columnspan=2)
         self.text_var = StringVar()
         self.text_box = Entry(master, state='normal',
                               textvariable=self.text_var)
-        self.text_box.grid(row=3)
+        self.text_box.grid(row=3, column=0, sticky='e')
+        self.clear_text_btn = Button(master, text='clear',
+                                     bg='red', pady=3, padx=3)
+        self.clear_text_btn.grid(row=3, column=1, sticky='w')
 
         buttons_frame = Frame(master)
-        buttons_frame.grid(row=4, pady=5)
+        buttons_frame.grid(row=4, pady=5, columnspan=2)
 
         self.save_image_btn = Button(buttons_frame, pady=10, padx=20,
                                      text='Save', state='normal',
@@ -63,3 +65,6 @@ class PatternImage:
         self.print_btn = Button(buttons_frame, pady=10,
                                 padx=20, text='Print', state='disabled')
         self.print_btn.grid(row=0, column=2)
+
+    def clear_text(self) -> None:
+        self.text_var.set('')
