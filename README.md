@@ -13,7 +13,9 @@ You can also edit properties of the image such as:
 
 For now app supports only polish alphabet
 
-
+## Example 1
 ![](images/drawing_area.png)
+## Example 2
+![](images/settings.png)
 
 
