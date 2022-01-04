@@ -44,7 +44,7 @@ class PatternImage:
         self.drawing_area.grid_propagate(0)
 
         self.msg = Label(master)
-        self.msg.grid(row=5, columnspan=2)
+        #self.msg.grid(row=5, columnspan=2)
 
         Label(master,
               text='Type your text here...').grid(row=2, columnspan=2)
@@ -69,3 +69,14 @@ class PatternImage:
 
     def clear_text(self) -> None:
         self.text_var.set('')
+
+    def is_error_on_grid(self) -> None:
+        return self.msg.winfo_ismapped()
+
+    def remove_last_char_from_text_var(self) -> None:
+        current_value = self.text_var.get()
+        self.text_var.set(current_value[:-1])
+
+    def prepare_name_of_image(self) -> None:
+        text = self.text_var.get()
+        return text[:25]

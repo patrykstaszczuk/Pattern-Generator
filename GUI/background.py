@@ -68,7 +68,7 @@ class BackgroundSettings:
         self.set_default_values()
 
     def set_default_values(self) -> None:
-        self.width_input.set(4000)
+        self.width_input.set(1920)
         self.num_of_columns_input.set(7)
         self.with_mesh_input.set('no')
         self.color_input.set('#FFFFFF')

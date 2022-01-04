@@ -24,6 +24,7 @@ class PatternGenerator:
         self.height = master.winfo_screenheight()
         master.title("Pattern Generator")
         master.geometry(f'{self.width}x{self.height}')
+        master.configure(bg='white')
 
         self.settings_frame = Frame(
             self.master, width=(self.width//4) - 10, height=self.height)
@@ -190,13 +191,17 @@ class PatternGenerator:
         start_line_width = self.pattern_settings.width.get()
         color = self.pattern_settings.color.get()
         text = self.pattern_image.text_box.get()
+
         try:
             setattr(self.pattern, 'start_line_width', start_line_width)
             setattr(self.pattern, 'color', color)
             setattr(self.pattern, 'text', text)
             self.clear_info(self.pattern_image.msg)
         except ValueError as e:
+            if self.pattern_image.is_error_on_grid():
+                self.pattern_image.remove_last_char_from_text_var()
             self.show_info(self.pattern_image.msg, e, 'red')
+
         self.pattern.image = self.pattern.original_background.copy()
         self.display_image(
             self.pattern_image.drawing_area,
@@ -226,10 +231,30 @@ class PatternGenerator:
         label.grid(columnspan=3)
 
     def save_the_image(self) -> None:
+        name = self.pattern_image.prepare_name_of_image()
+        ext = '.jpg'
+
+        if len(name) == 0:
+            info = 'You cannot save pattern without any letters'
+            self.show_info(self.pattern_image.msg, info, 'red')
+            return
+
         image = self.pattern.draw()
-        path = str(os.path.expanduser("~/Desktop/")) + 'pattern.jpg'
-        image.save(path, quality=100)
-        info = 'Pattern generated on the Desktop, under the pattern.jpg name'
+        path = str(os.path.expanduser("~/Desktop/")) + name
+        full_path = path + ext
+
+        if os.path.exists(full_path):
+            counter = 1
+            while os.path.exists(path + str(counter) + ext) and counter < 10:
+                counter += 1
+            if counter == 10:
+                info = 'Problem with saving file, try to type different text'
+                self.show_info(self.pattern_image.msg, info, 'red')
+                return
+            full_path = path + str(counter) + ext
+
+        image.save(full_path, quality=100, format='jpeg')
+        info = f'Pattern generated on the Desktop, under the "{name}" name'
         self.show_info(self.pattern_image.msg, info, 'green')
 
     def disable_children(self, parent: Frame) -> None:
