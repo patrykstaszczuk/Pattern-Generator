@@ -182,3 +182,13 @@ def test_creating_lines_with_non_default_color(pattern_params) -> None:
     pattern_params.update({'color': '#fa1a92'})
     pattern = Pattern(**pattern_params)
     assert pattern.color == pattern_params['color']
+
+
+def test_GetPrintableVersion_method(pattern_params) -> None:
+    pattern = Pattern(**pattern_params)
+    default_image = pattern.draw()
+    font_size = pattern._calculate_printable_font_size()
+    rows_to_be_added = pattern._calculate_nums_of_rows_for_text(font_size)
+    new_height = default_image.size[1] + pattern._calculate_extra_space(font_size, rows_to_be_added)
+    image = pattern.get_printable_version()
+    assert image.size[1] == new_height

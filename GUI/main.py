@@ -45,7 +45,7 @@ class PatternGenerator:
         self.right_frame.grid_propagate(0)
 
         self.set_save_settings_button()
-        self.set_default_settingds_button()
+        self.set_default_settings_button()
         self.set_config_button()
         self.configure_pattern_image_buttons()
         self.show_drawing_frame()
@@ -60,7 +60,7 @@ class PatternGenerator:
         self.save_settings_btn.grid(row=3, column=0, sticky='e')
         self.bind_save_settings_button()
 
-    def set_default_settingds_button(self) -> None:
+    def set_default_settings_button(self) -> None:
         self.default_settings_btn = Button(
             self.settings_frame, pady=10, padx=20, text='Restore default')
         self.default_settings_btn.grid(row=3, column=0, sticky='w')
@@ -197,10 +197,12 @@ class PatternGenerator:
             setattr(self.pattern, 'color', color)
             setattr(self.pattern, 'text', text)
             self.clear_info(self.pattern_image.msg)
+            self.enable_widget(self.pattern_image.save_image_btn)
         except ValueError as e:
             if self.pattern_image.is_error_on_grid():
                 self.pattern_image.remove_last_char_from_text_var()
             self.show_info(self.pattern_image.msg, e, 'red')
+            self.disable_widget(self.pattern_image.save_image_btn)
 
         self.pattern.image = self.pattern.original_background.copy()
         self.display_image(
@@ -239,7 +241,7 @@ class PatternGenerator:
             self.show_info(self.pattern_image.msg, info, 'red')
             return
 
-        image = self.pattern.draw()
+        image = self.pattern.get_printable_version()
         path = str(os.path.expanduser("~/Desktop/")) + name
         full_path = path + ext
 
@@ -251,6 +253,7 @@ class PatternGenerator:
                 info = 'Problem with saving file, try to type different text'
                 self.show_info(self.pattern_image.msg, info, 'red')
                 return
+            name = name+str(counter)
             full_path = path + str(counter) + ext
 
         image.save(full_path, quality=100, format='jpeg')
