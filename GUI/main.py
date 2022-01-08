@@ -235,7 +235,6 @@ class PatternGenerator:
     def save_the_image(self) -> None:
         name = self.pattern_image.prepare_name_of_image()
         ext = '.jpg'
-
         if len(name) == 0:
             info = 'You cannot save pattern without any letters'
             self.show_info(self.pattern_image.msg, info, 'red')
@@ -247,9 +246,9 @@ class PatternGenerator:
 
         if os.path.exists(full_path):
             counter = 1
-            while os.path.exists(path + str(counter) + ext) and counter < 10:
+            while os.path.exists(path + str(counter) + ext) and counter < 30:
                 counter += 1
-            if counter == 10:
+            if counter == 30:
                 info = 'Problem with saving file, try to type different text'
                 self.show_info(self.pattern_image.msg, info, 'red')
                 return

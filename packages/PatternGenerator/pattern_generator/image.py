@@ -1,6 +1,7 @@
 import math
 import re
 import os
+import string
 import textwrap
 
 from PIL import Image as PIL_Image
@@ -261,13 +262,23 @@ class Pattern:
         draw = ImageDraw.Draw(img)
         font_size = self._calculate_printable_font_size()
         font = get_font_instance(font_size)
+
         size_of_one_letter = font.getlength('a')
         max_chars_in_row = math.floor(
             self.width / size_of_one_letter)
-        lines = textwrap.wrap(self.text, width=max_chars_in_row)
+        text_lines = textwrap.wrap(self.text, width=max_chars_in_row)
         text_hight = self.height
 
+        left_padding = font_size * 2
+        for line in text_lines:
+            width, height = font.getsize(line)
+            draw.text((0 + left_padding, text_hight),
+                      text=line, font=font, fill='black')
+            text_hight += height
+
         # to be discused which version is better
+
+        # from right version:
 
         # right_pading = font_size
         # for line in lines:
@@ -276,11 +287,12 @@ class Pattern:
         #               line, font=font, fill='black')
         #     text_hight += height
 
-        for line in lines:
-            width, height = font.getsize(line)
-            draw.text(((self.width - width) / 2, text_hight),
-                      line, font=font, fill='black')
-            text_hight += height
+        # centered version:
+        # for line in text_lines:
+        #     width, height = font.getsize(line)
+        #     draw.text(((self.width - width) / 2, text_hight),
+        #               line, font=font, fill='black')
+        #     text_hight += height
 
         return img
 
@@ -300,8 +312,12 @@ class Pattern:
     def text(self, value) -> None:
         if not isinstance(value, str):
             raise ValueError('Text must be a string')
-        for char in value.replace(' ', ''):
-            if char.lower() not in self.schema.get_letters():
+        translator = str.maketrans(
+            string.punctuation, ' '*len(string.punctuation))
+        value = value.translate(translator)
+        value = value.lower()
+        for char in value:
+            if char not in self.schema.get_letters() and char != ' ':
                 raise ValueError(
                     f'Given schema does not support char "{char}"')
         self._text = value
