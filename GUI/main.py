@@ -24,6 +24,7 @@ class PatternGenerator:
         self.height = master.winfo_screenheight()
         master.title("Pattern Generator")
         master.geometry(f'{self.width}x{self.height}')
+        master.configure(bg='white')
 
         self.settings_frame = Frame(
             self.master, width=(self.width//4) - 10, height=self.height, bg='white')
@@ -219,7 +220,7 @@ class PatternGenerator:
         self.remove_children(frame)
         image = image.resize((width, height))
         img = ImageTk.PhotoImage(image=image)
-        label = Label(frame, image=img)
+        label = Label(frame, image=img, bg='white')
         label.image = img
         label.grid()
 

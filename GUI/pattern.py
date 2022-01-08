@@ -39,7 +39,8 @@ class PatternSettings:
 class PatternImage:
     def __init__(self, master):
         self.width = int(master.winfo_screenwidth()//2.3)
-        self.drawing_area = Frame(master, width=self.width, height=self.width)
+        self.drawing_area = Frame(
+            master, width=self.width, height=self.width, bg='white')
         self.drawing_area.grid(row=1, columnspan=2, pady=10, padx=50)
         self.drawing_area.grid_propagate(0)
 
@@ -47,7 +48,7 @@ class PatternImage:
         #self.msg.grid(row=5, columnspan=2)
 
         Label(master,
-              text='Type your text here...').grid(row=2, columnspan=2)
+              text='Type your text here...', bg='white').grid(row=2, columnspan=2)
         self.text_var = StringVar()
         self.text_box = Entry(master, state='normal',
                               textvariable=self.text_var)
