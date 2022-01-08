@@ -52,8 +52,7 @@ class PatternImage:
         self.text_box = Entry(master, state='normal',
                               textvariable=self.text_var)
         self.text_box.grid(row=3, column=0, sticky='e')
-        self.clear_text_btn = Button(master, text='clear',
-                                     bg='red', pady=3, padx=3)
+        self.clear_text_btn = Button(master, text='clear', pady=2, padx=2)
         self.clear_text_btn.grid(row=3, column=1, sticky='w')
 
         buttons_frame = Frame(master)

@@ -24,14 +24,13 @@ class PatternGenerator:
         self.height = master.winfo_screenheight()
         master.title("Pattern Generator")
         master.geometry(f'{self.width}x{self.height}')
-        master.configure(bg='white')
 
         self.settings_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height)
+            self.master, width=(self.width//4) - 10, height=self.height, bg='white')
         self.drawing_frame = Frame(
-            self.master, width=(self.width//2) - 10, height=self.height)
+            self.master, width=(self.width//2) - 10, height=self.height, bg='white')
         self.right_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height)
+            self.master, width=(self.width//4) - 10, height=self.height, bg='white')
 
         self.img_background_settings = BackgroundSettings(self.settings_frame)
         self.pattern_settings = PatternSettings(self.settings_frame)
