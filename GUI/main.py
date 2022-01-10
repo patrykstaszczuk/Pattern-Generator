@@ -242,7 +242,7 @@ class PatternGenerator:
             return
 
         root_path = os.path.dirname(sys.argv[0])
-        folder_name = f'Patterns {datetime.date.today()}'
+        folder_name = f'Patterns-{datetime.date.today()}'
         path = f'{root_path}/{folder_name}/'
         if not os.path.exists(path):
             os.mkdir(path)
@@ -264,7 +264,7 @@ class PatternGenerator:
             full_path = path + str(counter) + ext
 
         image.save(full_path, quality=100, format='jpeg')
-        info = f'Done, pattern available in pr {full_path}'
+        info = f'Done, pattern available in {full_path}'
         self.show_info(self.pattern_image.msg, info, 'green')
 
     def disable_children(self, parent: Frame) -> None:
