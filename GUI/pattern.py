@@ -11,22 +11,24 @@ from tkinter import (
 
 class PatternSettings:
     def __init__(self, master):
-        self.frame = Frame(master)
+        self.frame = Frame(master, bg='white')
         self.frame.grid(row=2, column=0, padx=10, pady=5)
 
         self.msg = Label(self.frame)
 
         Label(self.frame,
-              text='Pattern line width: ').grid(row=0, column=0, pady=10)
+              text='Pattern line width: ', bg='white').grid(row=0, column=0, pady=10)
         self.width_input = IntVar()
 
-        self.width = Entry(self.frame, textvariable=self.width_input)
+        self.width = Entry(
+            self.frame, textvariable=self.width_input, bg='white')
         self.width.grid(row=0, column=1)
         self.width.name = 'width'
         Label(self.frame,
-              text='Line color: ').grid(row=1, column=0, pady=10)
+              text='Line color: ', bg='white').grid(row=1, column=0, pady=10)
         self.color_input = StringVar()
-        self.color = Entry(self.frame, textvariable=self.color_input)
+        self.color = Entry(
+            self.frame, textvariable=self.color_input, bg='white')
         self.color.grid(row=1, column=1)
         self.color.name = 'color'
         self.set_default_values()
@@ -39,9 +41,9 @@ class PatternSettings:
 class PatternImage:
     def __init__(self, master):
         self.width = int(master.winfo_screenwidth()//3)
-        self.left_side = Frame(master, width=self.width//4)
-        self.right_side = Frame(master, width=self.width//4)
-        self.center = Frame(master, width=self.width)
+        self.left_side = Frame(master, width=self.width//4, bg='white')
+        self.right_side = Frame(master, width=self.width//4, bg='white')
+        self.center = Frame(master, width=self.width, bg='white')
 
         self.left_side.grid(column=0)
         self.left_side.grid_propagate(0)
@@ -50,7 +52,7 @@ class PatternImage:
         self.right_side.grid_propagate(0)
 
         self.drawing_area = Frame(
-            self.center, width=self.width, height=self.width)
+            self.center, width=self.width, height=self.width, bg='white')
         self.drawing_area.grid(row=1, pady=10)
         self.drawing_area.grid_propagate(0)
 

@@ -12,7 +12,7 @@ from tkinter import (
 
 class BackgroundSettings:
     def __init__(self, master):
-        self.frame = Frame(master)
+        self.frame = Frame(master, bg='white')
         self.frame.grid(row=1, column=0, pady=5, padx=10)
 
         self.error_msg = Label(self.frame)
@@ -34,13 +34,13 @@ class BackgroundSettings:
         Label(self.frame,
               text='With mesh: ', bg='white').grid(row=2, column=0, sticky='w', pady=10)
         self.with_mesh_input = StringVar()
-        radio_buttons = Frame(self.frame)
+        radio_buttons = Frame(self.frame, bg='white')
         radio_buttons.grid(row=2, column=1)
         r1 = Radiobutton(radio_buttons, text="Yes",
-                         variable=self.with_mesh_input, value='yes')
+                         variable=self.with_mesh_input, value='yes', bg='white')
         r1.grid(row=0, column=0)
         r2 = Radiobutton(radio_buttons, text="No",
-                         variable=self.with_mesh_input, value='no')
+                         variable=self.with_mesh_input, value='no', bg='white')
         r2.grid(row=0, column=1)
 
         Label(self.frame,
