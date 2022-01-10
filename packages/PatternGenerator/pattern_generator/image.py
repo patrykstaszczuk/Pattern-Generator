@@ -46,9 +46,9 @@ class ImageBackground:
         font_name = "DejaVuSans.ttf"
         font_path = dir_path + '/fonts/' + font_name
         try:
-
+            font_size = round(self.width/80)
             self.font = ImageFont.truetype(
-                f"{font_path}", round(self.width/100))
+                f"{font_path}", font_size)
         except OSError:
             raise ImportError(f'Cannot import font {font_name}".')
 
@@ -80,7 +80,6 @@ class ImageBackground:
         self._tile_width, self._tile_height = self.get_tile_size()
         tile_center = self._get_first_tile_center()
         x_start = tile_center[0]
-
         for item, value in self.mapping.items():
             self.mapping.update({item: [tile_center[0], tile_center[1]]})
             if self.width - self._tile_width < tile_center[0] + self._tile_width/2:
@@ -94,16 +93,11 @@ class ImageBackground:
         draw = ImageDraw.Draw(background)
         for item, value in self.mapping.items():
             draw.text(value, item, self.mesh_color, font=self.font)
-            half_tile = self._tile_width/2
-            draw.rectangle(
-                (value[0]-half_tile,  value[1]-half_tile,
-                 value[0]+half_tile, value[1]+half_tile),
-                outline=self.mesh_color, width=1)
         return background
 
     def _get_first_tile_center(self) -> tuple[int, int]:
         """ return center of the first tile """
-        return [item/2 for item in self.get_tile_size()]
+        return [round(item/2) for item in self.get_tile_size()]
 
     def get_tile_size(self) -> tuple[int, int]:
         """ return one tile size. Tile is a 1x1 square field inside image
@@ -215,6 +209,7 @@ class Pattern:
                 break
             if any([self.text[i] == ' ', self.text[i+1] == ' ']):
                 continue
+
             line_start_point = mapping[value.lower()]
             line_end_point = mapping[self.text[i+1].lower()]
             pair = self.text[i] + self.text[i+1]

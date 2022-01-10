@@ -63,7 +63,6 @@ class BackgroundSettings:
         self.apply_button.grid(row=7, column=0)
         self.edit_background_btn = Button(self.frame, text='Edit background settings',
                                           pady=10, padx=10, name='edit_bg_settings', state='disable')
-        #Label(self.frame).grid(row=7, column=1)
         self.edit_background_btn.grid(row=7, column=1)
         self.set_default_values()
 

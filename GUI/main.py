@@ -215,8 +215,8 @@ class PatternGenerator:
     def display_image(self,
                       frame: Frame,
                       image: Image,
-                      width: int = 360,
-                      height: int = 360) -> None:
+                      width: int,
+                      height: int) -> None:
         self.remove_children(frame)
         image = image.resize((width, height))
         img = ImageTk.PhotoImage(image=image)

@@ -38,7 +38,7 @@ class PatternSettings:
 
 class PatternImage:
     def __init__(self, master):
-        self.width = int(master.winfo_screenwidth()//2.3)
+        self.width = int(master.winfo_screenwidth()//2.6)
         self.drawing_area = Frame(
             master, width=self.width, height=self.width, bg='white')
         self.drawing_area.grid(row=1, columnspan=2, pady=10, padx=50)
