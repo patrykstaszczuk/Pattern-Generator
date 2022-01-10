@@ -27,11 +27,11 @@ class PatternGenerator:
         master.configure(bg='white')
 
         self.settings_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height, bg='white')
+            self.master, width=(self.width//4) - 10, height=self.height)
         self.drawing_frame = Frame(
-            self.master, width=(self.width//2) - 10, height=self.height, bg='white')
+            self.master, width=(self.width//2) - 10, height=self.height)
         self.right_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height, bg='white')
+            self.master, width=(self.width//4) - 10, height=self.height)
 
         self.img_background_settings = BackgroundSettings(self.settings_frame)
         self.pattern_settings = PatternSettings(self.settings_frame)
@@ -101,9 +101,9 @@ class PatternGenerator:
         self.create_background(
             self.img_background_settings.width.get(),
             self.img_background_settings.num_of_columns.get(),
-            self.img_background_settings.with_mesh.get(),
+            self.img_background_settings.with_mesh_input.get(),
             self.img_background_settings.color.get(),
-            self.img_background_settings.mesh_color.get(),
+            self.img_background_settings.mesh_color_input.get(),
             self.img_background_settings.schema_input.get())
 
     def show_config(self) -> None:
