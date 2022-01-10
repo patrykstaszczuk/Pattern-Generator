@@ -1,4 +1,5 @@
 *.pyc
+GUI/Patterns *
 /dist/
 /*.egg-info
 .DS_Store

@@ -1,5 +1,6 @@
 import os
 import sys
+import datetime
 
 from tkinter import (
     Tk,
@@ -10,7 +11,7 @@ from tkinter import (
 from PIL import Image, ImageTk
 
 from pattern_generator import ImageBackground, SimplePolishSchema, Pattern
-from background import BackgroundImage, BackgroundSettings
+from background import BackgroundSettings
 from pattern import PatternImage, PatternSettings
 
 
@@ -234,14 +235,21 @@ class PatternGenerator:
 
     def save_the_image(self) -> None:
         name = self.pattern_image.prepare_name_of_image()
-        ext = '.jpg'
+
         if len(name) == 0:
             info = 'You cannot save pattern without any letters'
             self.show_info(self.pattern_image.msg, info, 'red')
             return
 
+        root_path = os.path.dirname(sys.argv[0])
+        folder_name = f'Patterns {datetime.date.today()}'
+        path = f'{root_path}/{folder_name}/'
+        if not os.path.exists(path):
+            os.mkdir(path)
+
         image = self.pattern.get_printable_version()
-        path = str(os.path.expanduser("~/Desktop/")) + name
+        path = path + name
+        ext = '.jpg'
         full_path = path + ext
 
         if os.path.exists(full_path):
@@ -249,14 +257,14 @@ class PatternGenerator:
             while os.path.exists(path + str(counter) + ext) and counter < 30:
                 counter += 1
             if counter == 30:
-                info = 'Problem with saving file, try to type different text'
+                info = f'Max number of files with name {name} reached'
                 self.show_info(self.pattern_image.msg, info, 'red')
                 return
             name = name+str(counter)
             full_path = path + str(counter) + ext
 
         image.save(full_path, quality=100, format='jpeg')
-        info = f'Pattern generated on the Desktop, under the "{name}" name'
+        info = f'Done, pattern available in pr {full_path}'
         self.show_info(self.pattern_image.msg, info, 'green')
 
     def disable_children(self, parent: Frame) -> None:
