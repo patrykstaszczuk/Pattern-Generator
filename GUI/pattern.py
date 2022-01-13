@@ -38,6 +38,9 @@ class PatternSettings:
         self.width_input.set(0)
         self.color_input.set('#000000')
 
+    def has_active_errors(self) -> None:
+        return self.msg.grid_info()
+
 
 class PatternImage:
     def __init__(self, master):
@@ -59,7 +62,6 @@ class PatternImage:
         self.drawing_area.grid_propagate(0)
 
         self.msg = Label(self.center)
-        #self.msg.grid(row=5, columnspan=2)
 
         Label(self.center,
               text='Type your text here...', bg='white').grid(row=2)
@@ -88,8 +90,8 @@ class PatternImage:
     def clear_text(self) -> None:
         self.text_var.set('')
 
-    def is_error_on_grid(self) -> None:
-        return self.msg.winfo_ismapped()
+    def has_active_errors(self) -> None:
+        return self.msg.grid_info()
 
     def remove_last_char_from_text_var(self) -> None:
         current_value = self.text_var.get()

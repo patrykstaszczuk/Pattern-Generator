@@ -80,6 +80,9 @@ class BackgroundSettings:
         self.mesh_color_input.set('#000000')
         self.schema_input.set('SimplePolishSchema')
 
+    def has_active_errors(self) -> None:
+        return self.error_msg.grid_info()
+
 
 class BackgroundImage:
     def __init__(self, master):

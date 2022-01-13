@@ -10,7 +10,7 @@ from tkinter import (
     )
 from PIL import Image, ImageTk
 
-from pattern_generator import ImageBackground, SimplePolishSchema, Pattern
+from pattern_generator import ImageBackground, SimplePolishSchema, Pattern, Schema
 from background import BackgroundSettings
 from pattern import PatternImage, PatternSettings
 
@@ -61,9 +61,15 @@ class PatternGenerator:
 
     def bind_save_settings_button(self) -> None:
         self.save_settings_btn['command'] = lambda: [
-            self.invoke_create_background(),
-            self.create_pattern(),
-            self.show_drawing_frame()]
+            self.save_settings()
+            ]
+
+    def save_settings(self) -> None:
+        self.invoke_create_background()
+        if self.img_background_settings.has_active_errors() or self.pattern_settings.has_active_errors():
+            return
+        self.create_pattern()
+        self.show_drawing_frame()
 
     def set_restore_default_settings_button(self) -> None:
         self.default_settings_btn = Button(
@@ -92,32 +98,6 @@ class PatternGenerator:
     def bind_config_button(self) -> None:
         self.config_btn['command'] = lambda: self.show_config()
 
-    def show_drawing_frame(self) -> None:
-        self.img_background_settings.frame.grid_remove()
-        self.pattern_settings.frame.grid_remove()
-        self.save_settings_btn.grid_remove()
-        self.default_settings_btn.grid_remove()
-        self.enable_children(self.drawing_frame)
-
-    def invoke_create_background(self) -> None:
-        self.create_background(
-            self.img_background_settings.width.get(),
-            self.img_background_settings.num_of_columns.get(),
-            self.img_background_settings.with_mesh_input.get(),
-            self.img_background_settings.color.get(),
-            self.img_background_settings.mesh_color_input.get(),
-            self.img_background_settings.schema_input.get())
-
-    def show_config(self) -> None:
-        self.disable_children(self.drawing_frame)
-        self.img_background_settings.frame.grid()
-        self.save_settings_btn.grid()
-        self.default_settings_btn.grid()
-        self.pattern_settings.frame.grid()
-
-    def print_the_pattern(self) -> None:
-        pass
-
     def bind_pattern_image_buttons(self) -> None:
         self.pattern_image.clear_text_btn['command'] = \
             lambda: [self.pattern_image.clear_text(),
@@ -130,73 +110,93 @@ class PatternGenerator:
         self.pattern_image.print_btn['command'] = lambda: self.print_the_pattern(
         )
 
-    def bind_bg_setting_apply_btn(self) -> None:
-        self.img_background_settings.apply_button['command'] = \
-            lambda: self.invoke_create_background()
+    def invoke_create_background(self) -> None:
+        self.create_background(
+            self.img_background_settings.width.get(),
+            self.img_background_settings.num_of_columns.get(),
+            self.img_background_settings.with_mesh_input.get(),
+            self.img_background_settings.color.get(),
+            self.img_background_settings.mesh_color_input.get(),
+            self.img_background_settings.schema_input.get())
 
-    def bind_pattern_settings_generate_btn(self) -> None:
-        self.pattern_settings.pattern_preview_btn['command'] = \
-            lambda: [
-               self.create_pattern()
-               ]
+    def show_drawing_frame(self) -> None:
+        self.img_background_settings.frame.grid_remove()
+        self.pattern_settings.frame.grid_remove()
+        self.save_settings_btn.grid_remove()
+        self.default_settings_btn.grid_remove()
+        self.enable_children(self.drawing_frame)
+
+    def show_config(self) -> None:
+        self.disable_children(self.drawing_frame)
+        self.img_background_settings.frame.grid()
+        self.save_settings_btn.grid()
+        self.default_settings_btn.grid()
+        self.pattern_settings.frame.grid()
+
+    def print_the_pattern(self) -> None:
+        pass
 
     def create_background(
             self, width: str, num_of_columns: str, with_mesh: str,
             color: str, mesh_color: str, schema: str
             ) -> None:
 
-        self.schema = SimplePolishSchema()
+        schema = SimplePolishSchema()
+
         if with_mesh.upper() == 'YES':
             with_mesh = True
         else:
             with_mesh = False
 
         try:
-            self.background = ImageBackground(
+            background = ImageBackground(
                 width=width,
-                schema=self.schema,
+                schema=schema,
                 with_mesh=with_mesh,
                 mesh_color=mesh_color,
                 num_of_colums=num_of_columns,
                 color=color,
                 )
             self.clear_info(self.img_background_settings.error_msg)
+            self.init_pattern(background, schema)
         except ValueError as e:
             self.show_info(self.img_background_settings.error_msg, e)
-            return
-        self.init_pattern()
 
-    def init_pattern(self) -> None:
-        self.pattern = Pattern(
-            background=self.background,
-            schema=self.schema,
-            image=self.background.generate_image_background(),
-        )
+    def init_pattern(self, background: ImageBackground, schema: Schema) -> None:
+        try:
+            self.pattern = Pattern(
+                background=background,
+                schema=schema,
+                image=background.generate_image_background(),
+                start_line_width=self.pattern_settings.width.get(),
+                color=self.pattern_settings.color.get(),
+            )
+            self.clear_info(self.pattern_settings.msg)
+        except ValueError as e:
+            self.show_info(self.pattern_settings.msg, e, 'red')
 
     def create_pattern(self) -> None:
         if not hasattr(self, 'pattern'):
             self.init_pattern()
-        start_line_width = self.pattern_settings.width.get()
-        color = self.pattern_settings.color.get()
+
         text = self.pattern_image.text_box.get()
 
         try:
-            setattr(self.pattern, 'start_line_width', start_line_width)
-            setattr(self.pattern, 'color', color)
             setattr(self.pattern, 'text', text)
             self.clear_info(self.pattern_image.msg)
             self.enable_widget(self.pattern_image.save_image_btn)
+
+            self.pattern.image = self.pattern.original_background.copy()
+            self.display_image(
+                self.pattern_image.drawing_area,
+                self.pattern.draw(),
+                )
         except ValueError as e:
-            if self.pattern_image.is_error_on_grid():
+            if self.pattern_image.has_active_errors():
+                """ do not append new letters if error is active """
                 self.pattern_image.remove_last_char_from_text_var()
             self.show_info(self.pattern_image.msg, e, 'red')
             self.disable_widget(self.pattern_image.save_image_btn)
-
-        self.pattern.image = self.pattern.original_background.copy()
-        self.display_image(
-            self.pattern_image.drawing_area,
-            self.pattern.draw(),
-            )
 
     def display_image(self,
                       frame: Frame,
@@ -206,35 +206,44 @@ class PatternGenerator:
         img_width = image.size[0]
         img_height = image.size[1]
         frame_size = frame.winfo_width()
+
         if img_width >= img_height:
-            width_ratio = img_width//frame_size
+            width_ratio = img_width/frame_size
             width = frame_size
-            height = img_height//width_ratio
+            height = img_height/width_ratio
         else:
-            height_ratio = img_height//frame_size
+            height_ratio = img_height/frame_size
             height = frame_size
-            width = img_width//height_ratio
+            width = img_width/height_ratio
 
         self.remove_children(frame)
-        image = image.resize((width, height))
+        image = image.resize((round(width), round(height)))
 
         if image.size[0] < frame_size:
-            diff = frame_size - image.size[0]
-            new_size = (image.size[0]+diff, image.size[1])
-            wider_image = Image.new('RGB', new_size, color='white')
-            wider_image.paste(image, (diff//2, 0))
-            image = wider_image
+            image = self.get_resized_image_in_width(image, frame_size)
         if image.size[1] < frame_size:
-            diff = frame_size - image.size[1]
-            new_size = (image.size[0], image.size[1] + diff)
-            higher_image = Image.new('RGB', new_size, color='white')
-            higher_image.paste(image, (0, diff//2))
-            image = higher_image
+            image = self.get_reisized_image_in_height(image, frame_size)
 
         img = ImageTk.PhotoImage(image=image)
         label = Label(frame, image=img, bg='white')
         label.image = img
         label.grid()
+
+    @staticmethod
+    def get_resized_image_in_width(image: Image, frame_size: int) -> Image:
+        diff = frame_size - image.size[0]
+        new_size = (image.size[0]+diff, image.size[1])
+        wider_image = Image.new('RGB', new_size, color='white')
+        wider_image.paste(image, (diff//2, 0))
+        return wider_image
+
+    @staticmethod
+    def get_reisized_image_in_height(image: Image, frame_size: int) -> Image:
+        diff = frame_size - image.size[1]
+        new_size = (image.size[0], image.size[1] + diff)
+        higher_image = Image.new('RGB', new_size, color='white')
+        higher_image.paste(image, (0, diff//2))
+        return higher_image
 
     def clear_info(self, label: Label) -> None:
         label.grid_remove()
