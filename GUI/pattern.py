@@ -15,21 +15,22 @@ class PatternSettings:
         self.frame.grid(row=2, column=0, padx=10, pady=5)
 
         self.msg = Label(self.frame)
-
+        Label(self.frame, bg='white', text='Pattern settings: ').grid(
+            row=0, columnspan=2, pady=10)
         Label(self.frame,
-              text='Pattern line width: ', bg='white').grid(row=0, column=0, pady=10)
+              text='Pattern line width: ', bg='white').grid(row=1, column=0, pady=10)
         self.width_input = IntVar()
 
         self.width = Entry(
             self.frame, textvariable=self.width_input, bg='white')
-        self.width.grid(row=0, column=1)
+        self.width.grid(row=1, column=1)
         self.width.name = 'width'
         Label(self.frame,
-              text='Line color: ', bg='white').grid(row=1, column=0, pady=10)
+              text='Line color: ', bg='white').grid(row=2, column=0, pady=10)
         self.color_input = StringVar()
         self.color = Entry(
             self.frame, textvariable=self.color_input, bg='white')
-        self.color.grid(row=1, column=1)
+        self.color.grid(row=2, column=1)
         self.color.name = 'color'
         self.set_default_values()
 
