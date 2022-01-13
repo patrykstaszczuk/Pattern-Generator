@@ -196,17 +196,41 @@ class PatternGenerator:
         self.display_image(
             self.pattern_image.drawing_area,
             self.pattern.draw(),
-            self.pattern_image.width,
-            self.pattern_image.width
             )
 
     def display_image(self,
                       frame: Frame,
                       image: Image,
-                      width: int,
-                      height: int) -> None:
+                      ) -> None:
+
+        img_width = image.size[0]
+        img_height = image.size[1]
+        frame_size = frame.winfo_width()
+        if img_width >= img_height:
+            width_ratio = img_width//frame_size
+            width = frame_size
+            height = img_height//width_ratio
+        else:
+            height_ratio = img_height//frame_size
+            height = frame_size
+            width = img_width//height_ratio
+
         self.remove_children(frame)
         image = image.resize((width, height))
+
+        if image.size[0] < frame_size:
+            diff = frame_size - image.size[0]
+            new_size = (image.size[0]+diff, image.size[1])
+            wider_image = Image.new('RGB', new_size, color='white')
+            wider_image.paste(image, (diff//2, 0))
+            image = wider_image
+        if image.size[1] < frame_size:
+            diff = frame_size - image.size[1]
+            new_size = (image.size[0], image.size[1] + diff)
+            higher_image = Image.new('RGB', new_size, color='white')
+            higher_image.paste(image, (0, diff//2))
+            image = higher_image
+
         img = ImageTk.PhotoImage(image=image)
         label = Label(frame, image=img, bg='white')
         label.image = img

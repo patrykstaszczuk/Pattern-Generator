@@ -93,11 +93,6 @@ class ImageBackground:
         draw = ImageDraw.Draw(background)
         for item, value in self.mapping.items():
             draw.text(value, item, self.mesh_color, font=self.font)
-            half_tile = self._tile_width/2
-            draw.rectangle(
-                (value[0]-half_tile,  value[1]-half_tile,
-                 value[0]+half_tile, value[1]+half_tile),
-                outline=self.mesh_color, width=1)
         return background
 
     def _get_first_tile_center(self) -> tuple[int, int]:

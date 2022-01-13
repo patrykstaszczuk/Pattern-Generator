@@ -42,6 +42,7 @@ class PatternSettings:
 class PatternImage:
     def __init__(self, master):
         self.width = int(master.winfo_screenwidth()//3)
+        self.height = self.width
         self.left_side = Frame(master, width=self.width//4, bg='white')
         self.right_side = Frame(master, width=self.width//4, bg='white')
         self.center = Frame(master, width=self.width, bg='white')
@@ -53,7 +54,7 @@ class PatternImage:
         self.right_side.grid_propagate(0)
 
         self.drawing_area = Frame(
-            self.center, width=self.width, height=self.width, bg='white')
+            self.center, width=self.width, height=self.height, bg='white')
         self.drawing_area.grid(row=1, pady=10)
         self.drawing_area.grid_propagate(0)
 
