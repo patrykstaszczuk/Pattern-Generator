@@ -1,6 +1,7 @@
 import os
 import sys
 import datetime
+import re
 
 from tkinter import (
     Tk,
@@ -45,11 +46,13 @@ class PatternGenerator:
         self.pattern_settings = PatternSettings(self.settings_frame)
         self.pattern_image = PatternImage(self.drawing_frame)
 
+        self.background = None
+        self.invoke_create_background()
         self.set_save_settings_button()
         self.set_restore_default_settings_button()
         self.set_config_button()
+        self.bind_pattern_image_text_input()
         self.bind_pattern_image_buttons()
-        self.invoke_create_background()
         self.show_drawing_frame()
         self.enable_widget(self.save_settings_btn)
 
@@ -98,20 +101,21 @@ class PatternGenerator:
     def bind_config_button(self) -> None:
         self.config_btn['command'] = lambda: self.show_config()
 
-    def bind_pattern_image_buttons(self) -> None:
+    def bind_pattern_image_text_input(self) -> None:
         self.pattern_image.clear_text_btn['command'] = \
             lambda: [self.pattern_image.clear_text(),
                      self.create_pattern()]
         self.pattern_image.text_var.trace_add(
             'write', self.text_callback)
 
+    def bind_pattern_image_buttons(self) -> None:
         self.pattern_image.save_image_btn['command'] = lambda: self.save_the_image(
         )
         self.pattern_image.print_btn['command'] = lambda: self.print_the_pattern(
         )
 
     def invoke_create_background(self) -> None:
-        self.create_background(
+        return self.create_background(
             self.img_background_settings.width.get(),
             self.img_background_settings.num_of_columns.get(),
             self.img_background_settings.with_mesh_input.get(),
@@ -124,7 +128,10 @@ class PatternGenerator:
         self.pattern_settings.frame.grid_remove()
         self.save_settings_btn.grid_remove()
         self.default_settings_btn.grid_remove()
+
         self.enable_children(self.drawing_frame)
+        resolutions = self.background.get_available_resolutions()
+        self.pattern_image.refresh_resolutions(resolutions)
 
     def show_config(self) -> None:
         self.disable_children(self.drawing_frame)
@@ -149,16 +156,17 @@ class PatternGenerator:
             with_mesh = False
 
         try:
-            background = ImageBackground(
+            self.background = ImageBackground(
                 width=width,
                 schema=schema,
                 with_mesh=with_mesh,
                 mesh_color=mesh_color,
-                num_of_colums=num_of_columns,
+                num_of_columns=num_of_columns,
                 color=color,
                 )
             self.clear_info(self.img_background_settings.error_msg)
-            self.init_pattern(background, schema)
+            self.init_pattern(self.background, schema)
+            return self.background
         except ValueError as e:
             self.show_info(self.img_background_settings.error_msg, e)
 
@@ -254,6 +262,8 @@ class PatternGenerator:
         label.grid(columnspan=3)
 
     def save_the_image(self) -> None:
+        resolution = self.get_resolution()
+        pattern = self.get_resized_pattern_obj(resolution)
         name = self.pattern_image.prepare_name_of_image()
 
         if len(name) == 0:
@@ -267,7 +277,8 @@ class PatternGenerator:
         if not os.path.exists(path):
             os.mkdir(path)
 
-        image = self.pattern.get_printable_version()
+        image = pattern.get_printable_version()
+
         path = path + name
         ext = '.jpg'
         full_path = path + ext
@@ -286,6 +297,35 @@ class PatternGenerator:
         image.save(full_path, quality=100, format='jpeg')
         info = f'Done, pattern available in {full_path}'
         self.show_info(self.pattern_image.msg, info, 'green')
+
+    def get_resolution(self) -> tuple:
+        res = self.pattern_image.resolution_input.get()
+        res_tuple = re.search(r'\((.*?)\)', res).groups(0)[0]
+        res_tuple = res_tuple.split(',')
+        res_tuple[0] = int(res_tuple[0])
+        res_tuple[1] = int(res_tuple[1])
+        return tuple(res_tuple)
+
+    def get_resized_pattern_obj(self, resolution: tuple) -> Pattern:
+
+        new_background = ImageBackground(
+            width=resolution[0],
+            schema=self.background.schema,
+            with_mesh=self.background.with_mesh,
+            mesh_color=self.background.mesh_color,
+            num_of_columns=self.background.num_of_colums,
+            color=self.background.color,
+            )
+
+        pattern = Pattern(
+            background=new_background,
+            image=new_background.generate_image_background(),
+            schema=new_background.schema,
+            start_line_width=self.pattern_settings.width.get(),
+            color=self.pattern_settings.color.get(),
+            text=self.pattern.text,
+        )
+        return pattern
 
     def disable_children(self, parent: Frame) -> None:
         for child in parent.winfo_children():

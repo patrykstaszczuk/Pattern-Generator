@@ -19,7 +19,7 @@ def image_params(schema) -> dict:
     return {
         'width': 4000,
         'schema': schema,
-        'num_of_colums': 7,
+        'num_of_columns': 7,
     }
 
 
@@ -49,18 +49,18 @@ def pattern(pattern_params) -> Pattern:
 def test_creating_image_instance_success(mock_font, schema) -> None:
     width = 4000
     schema = schema
-    num_of_colums = 7
+    num_of_columns = 7
     with_mesh = True
 
     image = ImageBackground(
         width=width,
         schema=schema,
-        num_of_colums=num_of_colums,
+        num_of_columns=num_of_columns,
         with_mesh=with_mesh,
         )
     assert image.width == width
     assert image.schema == schema
-    assert image.num_of_colums == num_of_colums
+    assert image.num_of_colums == num_of_columns
 
 
 def test_creating_image_with_invalid_width_raise_exception(image_params) -> None:
@@ -70,16 +70,16 @@ def test_creating_image_with_invalid_width_raise_exception(image_params) -> None
 
 
 def test_creating_image_with_width_greater_then_max_raise_exception(image_params) -> None:
-    image_params['width'] = 5617
+    image_params['width'] = 10001
     with pytest.raises(ValueError):
         ImageBackground(**image_params)
 
 
 def test_creating_image_with_invalid_number_of_columns(image_params) -> None:
-    image_params['num_of_colums'] = -1
+    image_params['num_of_columns'] = -1
     with pytest.raises(ValueError):
         ImageBackground(**image_params)
-    image_params['num_of_colums'] = image_params['schema'].get_length() + 1
+    image_params['num_of_columns'] = image_params['schema'].get_length() + 1
     with pytest.raises(ValueError):
         ImageBackground(**image_params)
 
@@ -115,10 +115,10 @@ def test_creating_image_with_invalid_mesh_color_failed(image_params) -> None:
 
 
 def test_background_height_should_be_calculated_dynamically(image_params) -> None:
-    image_params['num_of_colums'] = 9
+    image_params['num_of_columns'] = 9
     image = ImageBackground(**image_params)
 
-    num_of_columns = image_params['num_of_colums']
+    num_of_columns = image_params['num_of_columns']
     num_of_schema_letters = image.schema.get_length()
     excpected_num_of_rows = math.ceil(num_of_schema_letters/num_of_columns)
     expected_height = excpected_num_of_rows * image.get_tile_size()[1]

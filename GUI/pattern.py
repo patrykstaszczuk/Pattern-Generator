@@ -5,7 +5,8 @@ from tkinter import (
     IntVar,
     StringVar,
     Entry,
-    PhotoImage
+    PhotoImage,
+    OptionMenu,
     )
 
 
@@ -76,16 +77,23 @@ class PatternImage:
             text_box_frame, text='clear', pady=2, padx=2)
         self.clear_text_btn.grid(row=3, column=1, sticky='w')
 
-        buttons_frame = Frame(self.center)
-        buttons_frame.grid(row=4, pady=5, columnspan=2)
-
-        self.save_image_btn = Button(buttons_frame, pady=10, padx=20,
+        self.buttons_frame = Frame(self.center)
+        self.buttons_frame.grid(row=4, pady=5, columnspan=2)
+        Label(self.buttons_frame, text='Save the image: ').grid(
+            row=0, columnspan=3, pady=10)
+        self.save_image_btn = Button(self.buttons_frame, pady=3, padx=10,
                                      text='Save', state='normal',
                                      )
-        self.save_image_btn.grid(row=0, column=1)
-        self.print_btn = Button(buttons_frame, pady=10,
-                                padx=20, text='Print', state='disabled')
-        self.print_btn.grid(row=0, column=2)
+        self.save_image_btn.grid(row=1, column=0)
+
+        self.resolution_input = StringVar()
+        self.resolution = OptionMenu(
+            self.buttons_frame, self.resolution_input, 'None')
+        # Label(self.buttons_frame, text='..or print direclty: ').grid(
+        #     row=2, columnspan=3, pady=10)
+        self.print_btn = Button(self.buttons_frame, pady=3,
+                                padx=10, text='Print', state='disabled')
+        #self.print_btn.grid(row=3, columnspan=3)
 
     def clear_text(self) -> None:
         self.text_var.set('')
@@ -100,3 +108,10 @@ class PatternImage:
     def prepare_name_of_image(self) -> None:
         text = self.text_var.get()
         return text[:25]
+
+    def refresh_resolutions(self, resolution: list[str]) -> None:
+        self.resolution.grid_forget()
+        self.resolution_input.set(resolution[0])
+        self.resolution = OptionMenu(
+            self.buttons_frame, self.resolution_input, *resolution)
+        self.resolution.grid(row=1, column=2)

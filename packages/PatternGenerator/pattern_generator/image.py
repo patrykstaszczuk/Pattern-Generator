@@ -26,18 +26,18 @@ class ImageBackground:
         self,
         width: int,
         schema: Schema,
-        num_of_colums: int,
+        num_of_columns: int,
         color: str = '#FFFFFF',
         mesh_color: str = '#000000',
         with_mesh: bool = False,
     ) -> None:
         self.width = width
         self.schema = schema
-        self.num_of_colums = num_of_colums
+        self.num_of_colums = num_of_columns
         self.with_mesh = with_mesh
         self.mesh_color = mesh_color
         self.color = color
-        self._height = self._calculate_image_height()
+        self.height = self._calculate_image_height()
 
         self._tile_width = 0
         self._tile_height = 0
@@ -60,15 +60,15 @@ class ImageBackground:
         height_in_px = num_of_rows * self.get_tile_size()[1]
         if height_in_px >= 65500:
             raise ValueError('Cannot create background. '
-                             + 'Height cannot be greater then 65500px. '
-                             + 'Please decrease width or increase number of letters in one row')
+                             + 'Height cannot be greater then 65500px. \n'
+                             + 'Please decrease width or increase number of letters in one row \n')
         return height_in_px
 
     def generate_image_background(self) -> PIL_Image:
         """ generate PIL image """
         image = PIL_Image.new(
             'RGB',
-            (self.width, self._height),
+            (self.width, self.height),
             color=self.color)
         self._map_letters_to_image()
         if self.with_mesh:
@@ -82,7 +82,7 @@ class ImageBackground:
         x_start = tile_center[0]
         for item, value in self.mapping.items():
             self.mapping.update({item: [tile_center[0], tile_center[1]]})
-            if self.width - self._tile_width < tile_center[0] + self._tile_width/2:
+            if self.width - self._tile_width + 1 <= tile_center[0] + self._tile_width/2:
                 tile_center[0] = x_start
                 tile_center[1] += self._tile_height
             else:
@@ -106,8 +106,43 @@ class ImageBackground:
         tile_height = tile_width
         return (tile_width, tile_height)
 
+    def get_available_resolutions(self) -> list[str]:
+        horizontal = self.width >= self.height
+        resolutions = []
+
+        original = f'original ({self.width},{self.height})'
+        if horizontal:
+            a4_300_dpi = f'A4 - 300 DPI ({3508},{self._get_predicted_height(3508)})'
+            a3_300_dpi = f'A3 - 300 DPI ({4960},{self._get_predicted_height(4960)})'
+            a2_300_dpi = f'A2 - 300 DPI ({7016},{self._get_predicted_height(7016)})'
+            a1_300_dpi = f'A1 - 300 DPI ({9933},{self._get_predicted_height(9933)})'
+        else:
+            a4_300_dpi = f'A4 - 300 DPI ({self._get_predicted_width(3508)},{3508})'
+            a3_300_dpi = f'A3 - 300 DPI ({self._get_predicted_width(4960)},{4960})'
+            a2_300_dpi = f'A2 - 300 DPI ({self._get_predicted_width(7016)},{7016})'
+            a1_300_dpi = f'A1 - 300 DPI ({self._get_predicted_width(9933)},{9933})'
+
+        resolutions.append(original)
+        resolutions.append(a4_300_dpi)
+        resolutions.append(a3_300_dpi)
+        resolutions.append(a2_300_dpi)
+        resolutions.append(a1_300_dpi)
+
+        return resolutions
+
+    def _get_predicted_height(self, width: int) -> int:
+        num_of_letters = self.schema.get_length()
+        num_of_rows = math.ceil(num_of_letters/self.num_of_colums)
+        tile_width = math.floor(width/self.num_of_colums)
+        height_in_px = num_of_rows * tile_width
+        return height_in_px
+
+    def _get_predicted_width(self, height) -> int:
+        height_ratio = height/self.height
+        return math.floor(self.width * height_ratio)
+
     def get_height(self) -> int:
-        return self._height
+        return self.height
 
     @property
     def width(self) -> int:
@@ -145,7 +180,7 @@ class ImageBackground:
 
     @width.setter
     def width(self, value) -> None:
-        max_width = 5616
+        max_width = 10000
         try:
             value = int(value)
         except ValueError:
