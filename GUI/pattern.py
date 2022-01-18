@@ -6,10 +6,12 @@ from tkinter import (
     Entry,
     OptionMenu,
     )
+from PIL import Image as PIL_Image
 
 
 class ImageFrame:
     def __init__(self, master):
+        self.master = master
         self.width = int(master.winfo_screenwidth()//3)
         self.height = self.width
         self.left_side = Frame(master, width=self.width//4, bg='white')
@@ -80,3 +82,17 @@ class ImageFrame:
         self.resolution = OptionMenu(
             self.buttons_frame, self.resolution_input, *resolution)
         self.resolution.grid(row=1, column=2)
+
+    def calculate_preview_image_dimensions(self, width: int, height: int) -> None:
+        self.preview_image_width = width
+        self.preview_image_height = height
+        frame_size = self.width
+
+        if width >= height:
+            width_ratio = width/frame_size
+            self.preview_image_width = frame_size
+            self.preview_image_height = height/width_ratio
+        else:
+            height_ratio = height/frame_size
+            self.preview_image_height = frame_size
+            self.preview_image_width = width/height_ratio

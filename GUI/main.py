@@ -1,8 +1,7 @@
 import os
 import sys
-import datetime
 import re
-
+import time
 from tkinter import (
     Tk,
     Label,
@@ -165,13 +164,19 @@ class PatternGenerator:
 
     def init_pattern(self, background: ImageBackground, schema: Schema) -> None:
         try:
+            background_img = background.generate_image_background()
             self.pattern = Pattern(
                 background=background,
                 schema=schema,
-                image=background.generate_image_background(),
+                image=background_img,
                 start_line_width=self.settings.pattern_line_width.get(),
                 color=self.settings.pattern_line_color.get(),
             )
+            # we need to keep prev text after settings change
+            self.pattern.prev_text = self.image_frame.text_box.get()
+
+            self.image_frame.calculate_preview_image_dimensions(
+                background_img.width, background_img.height)
             self.clear_info(self.settings.error_msg)
         except ValueError as e:
             self.show_info(self.settings.error_msg, e, 'red')
@@ -198,19 +203,9 @@ class PatternGenerator:
             self.disable_widget(self.image_frame.save_image_btn)
 
     def display_image(self, frame: Frame, image: Image,) -> None:
-        img_width = image.size[0]
-        img_height = image.size[1]
         frame_size = frame.winfo_width()
-
-        if img_width >= img_height:
-            width_ratio = img_width/frame_size
-            width = frame_size
-            height = img_height/width_ratio
-        else:
-            height_ratio = img_height/frame_size
-            height = frame_size
-            width = img_width/height_ratio
-
+        width = self.image_frame.preview_image_width
+        height = self.image_frame.preview_image_height
         self.remove_children(frame)
         image = image.resize((round(width), round(height)))
 

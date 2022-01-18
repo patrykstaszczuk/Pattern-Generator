@@ -3,6 +3,7 @@ import re
 import math
 import string
 import textwrap
+import time
 
 from PIL import Image as PIL_Image
 from PIL import ImageFont, ImageDraw
@@ -45,52 +46,55 @@ class Pattern:
         self.height = image.size[1]
 
         self.existing_letter_pairs = {}
+        self.draw_instance = ImageDraw.Draw(self.image)
+        self.mapping = self.background.mapping
 
     def _calculate_line_width(self) -> int:
         """ calculate line width based on image width """
         return self.image.width//1000
 
+    """ performance 7000px 0.0002808570861816406 (draw)
+        0.03252911567687988 (redraw)"""
+
     def draw(self, text: str) -> PIL_Image:
         """ generate lines on given image based on provided parameters """
         setattr(self, 'text', text)
-        if len(self.prev_text) == 0 or self.prev_text != text[:-1]:
+        if len(self.prev_text) == 0:
+            pass
+        elif self.prev_text != text[:-1]:
             self.redraw()
         else:
             self.draw_new_line()
-        self.prev_text = self.text
+        setattr(self, 'prev_text', self.text)
         return self.image
 
     def draw_new_line(self) -> PIL_Image:
-        draw = ImageDraw.Draw(self.image)
-        mapping = self.background.mapping
-        self.draw_line(self.prev_text[-1], self.text[-1], draw, mapping)
+        self.draw_line(self.prev_text[-1], self.text[-1])
 
     def redraw(self) -> PIL_Image:
         self.image = self.original_background.copy()
-        draw = ImageDraw.Draw(self.image)
-        mapping = self.background.mapping
-        self.existing_letter_pairs = {}
-        for i, value in enumerate(self.text):
-            if i == len(self.text) - 1:
-                break
-            self.draw_line(self.text[i], self.text[i+1], draw, mapping)
+        self.draw_instance = ImageDraw.Draw(self.image)
 
-    def draw_line(self, a: str, b: str, draw: ImageDraw, mapping: dict) -> None:
+        self.existing_letter_pairs = {}
+        for i, value in enumerate(self.text[:-1]):
+            self.draw_line(self.text[i], self.text[i+1])
+
+    def draw_line(self, a: str, b: str) -> None:
         if any([a == ' ', b == ' ']):
             return
-        line_start_point = mapping[a.lower()]
-        line_end_point = mapping[b.lower()]
+        line_start_point = self.mapping[a]
+        line_end_point = self.mapping[b]
         pair = a + b
         width_of_line = self._get_line_width(pair)
-        draw.line((line_start_point[0], line_start_point[1], line_end_point[0],
-                   line_end_point[1]), fill=self.color, width=width_of_line)
+        self.draw_instance.line((line_start_point[0], line_start_point[1], line_end_point[0],
+                                 line_end_point[1]), fill=self.color, width=width_of_line)
 
     def _get_line_width(self, pair: str) -> None:
-        if pair in list(self.existing_letter_pairs.keys()):
+        if pair in self.existing_letter_pairs.keys():
             self.existing_letter_pairs.update(
                 {pair: self.existing_letter_pairs[pair] + self.start_line_width*2})
             width = self.existing_letter_pairs[pair]
-        elif pair[::-1] in list(self.existing_letter_pairs.keys()):
+        elif pair[::-1] in self.existing_letter_pairs.keys():
             self.existing_letter_pairs.update(
                 {pair[::-1]: self.existing_letter_pairs[pair[::-1]] + self.start_line_width*2})
             width = self.existing_letter_pairs[pair[::-1]]
