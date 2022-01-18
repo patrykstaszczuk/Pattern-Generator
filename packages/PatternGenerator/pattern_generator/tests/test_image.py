@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import patch, Mock
-from pattern_generator.image import ImageBackground, Pattern
+from pattern_generator.background import ImageBackground
+from pattern_generator.pattern import Pattern
 from pattern_generator.schemas import SimplePolishSchema, Schema
 from PIL.Image import Image as PIL_Image
 from PIL import ImageFont

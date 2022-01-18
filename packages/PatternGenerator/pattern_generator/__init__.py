@@ -1,4 +1,5 @@
-from .image import ImageBackground, Pattern
+from .background import ImageBackground
+from .pattern import Pattern
 from .schemas import SimplePolishSchema, Schema
 
 __all__ = [
