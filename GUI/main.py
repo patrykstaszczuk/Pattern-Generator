@@ -12,8 +12,9 @@ from tkinter import (
 from PIL import Image, ImageTk
 
 from pattern_generator import ImageBackground, SimplePolishSchema, Pattern, Schema
-from background import BackgroundSettings
-from pattern import PatternImage, PatternSettings
+from pattern import ImageFrame
+from settings import ImageSettings
+from image_exporter import ImageExporter
 
 
 class PatternGenerator:
@@ -42,111 +43,103 @@ class PatternGenerator:
         self.right_frame.grid(row=0, column=3, padx=5)
         self.right_frame.grid_propagate(0)
 
-        self.img_background_settings = BackgroundSettings(self.settings_frame)
-        self.pattern_settings = PatternSettings(self.settings_frame)
-        self.pattern_image = PatternImage(self.drawing_frame)
+        self.settings = ImageSettings(self.settings_frame)
+        self.image_frame = ImageFrame(self.drawing_frame)
 
-        self.background = None
-        self.invoke_create_background()
-        self.set_save_settings_button()
-        self.set_restore_default_settings_button()
-        self.set_config_button()
+        self.background = self.invoke_create_background()
+        self.show_config_btn = self.set_config_button()
+
+        self.bind_save_settings_btn()
+        self.bind_restore_default_settings_btn()
         self.bind_pattern_image_text_input()
         self.bind_pattern_image_buttons()
         self.show_drawing_frame()
-        self.enable_widget(self.save_settings_btn)
 
-    def set_save_settings_button(self) -> None:
-        self.save_settings_btn = Button(
-            self.settings_frame, pady=10, padx=30, text='Save')
-        self.save_settings_btn.grid(row=3, column=0, sticky='e')
-        self.bind_save_settings_button()
-
-    def bind_save_settings_button(self) -> None:
-        self.save_settings_btn['command'] = lambda: [
+    def bind_save_settings_btn(self) -> Button:
+        self.settings.save_settings_btn['command'] = lambda: [
             self.save_settings()
             ]
 
     def save_settings(self) -> None:
         self.invoke_create_background()
-        if self.img_background_settings.has_active_errors() or self.pattern_settings.has_active_errors():
+        if self.settings.has_active_errors():
             return
         self.create_pattern()
         self.show_drawing_frame()
 
-    def set_restore_default_settings_button(self) -> None:
-        self.default_settings_btn = Button(
-            self.settings_frame, pady=10, padx=20, text='Restore default')
-        self.default_settings_btn.grid(row=3, column=0, sticky='w')
-        self.bind_restore_default_button()
-
-    def bind_restore_default_button(self) -> None:
-        self.default_settings_btn['command'] = lambda: [
-            self.img_background_settings.set_default_values(),
-            self.pattern_settings.set_default_values(),
+    def bind_restore_default_settings_btn(self) -> Button:
+        self.settings.restore_default_settings_btn['command'] = lambda: [
+            self.settings.set_default_values(),
         ]
 
-    def set_config_button(self) -> None:
+    def set_config_button(self) -> Button:
         icon_path = self.get_icon_path()
         setting_icon = ImageTk.PhotoImage(file=icon_path)
-        self.config_btn = Button(self.settings_frame, state='normal',
-                                 image=setting_icon,
-                                 width=12,
-                                 height=12,
-                                 )
-        self.config_btn.image = setting_icon
-        self.config_btn.grid(row=0, sticky='w')
-        self.bind_config_button()
 
-    def bind_config_button(self) -> None:
-        self.config_btn['command'] = lambda: self.show_config()
+        btn = Button(self.settings_frame, state='normal',
+                     image=setting_icon,
+                     width=12,
+                     height=12,
+                     )
+        btn.image = setting_icon
+        btn.grid(row=0, sticky='w')
+
+        btn['command'] = lambda: self.show_config()
+        return btn
+
+    def get_icon_path(self) -> None:
+        relative_path = 'GUI/setting-icon.png'
+        try:
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+        return os.path.join(base_path, relative_path)
 
     def bind_pattern_image_text_input(self) -> None:
-        self.pattern_image.clear_text_btn['command'] = \
-            lambda: [self.pattern_image.clear_text(),
+        self.image_frame.clear_text_btn['command'] = \
+            lambda: [self.image_frame.clear_text(),
                      self.create_pattern()]
-        self.pattern_image.text_var.trace_add(
+        self.image_frame.text_var.trace_add(
             'write', self.text_callback)
 
+    def text_callback(self, *args):
+        self.create_pattern()
+
     def bind_pattern_image_buttons(self) -> None:
-        self.pattern_image.save_image_btn['command'] = lambda: self.save_the_image(
+        self.image_frame.save_image_btn['command'] = lambda: self.save_the_image(
         )
-        self.pattern_image.print_btn['command'] = lambda: self.print_the_pattern(
+        self.image_frame.print_btn['command'] = lambda: self.print_the_pattern(
         )
 
     def invoke_create_background(self) -> None:
+        """ Inputs are validated by package """
         return self.create_background(
-            self.img_background_settings.width.get(),
-            self.img_background_settings.num_of_columns.get(),
-            self.img_background_settings.with_mesh_input.get(),
-            self.img_background_settings.color.get(),
-            self.img_background_settings.mesh_color_input.get(),
-            self.img_background_settings.schema_input.get())
+            self.settings.background_width.get(),
+            self.settings.num_of_columns.get(),
+            self.settings.with_mesh_input.get(),
+            self.settings.background_color.get(),
+            self.settings.mesh_color.get(),
+            self.settings.schema_input.get())
 
     def show_drawing_frame(self) -> None:
-        self.img_background_settings.frame.grid_remove()
-        self.pattern_settings.frame.grid_remove()
-        self.save_settings_btn.grid_remove()
-        self.default_settings_btn.grid_remove()
+        self.settings.frame.grid_remove()
+        self.drawing_frame.grid()
+        self.right_frame.grid()
 
-        self.enable_children(self.drawing_frame)
         resolutions = self.background.get_available_resolutions()
-        self.pattern_image.refresh_resolutions(resolutions)
+        self.image_frame.refresh_resolutions(resolutions)
 
     def show_config(self) -> None:
-        self.disable_children(self.drawing_frame)
-        self.img_background_settings.frame.grid()
-        self.save_settings_btn.grid()
-        self.default_settings_btn.grid()
-        self.pattern_settings.frame.grid()
+        self.drawing_frame.grid_remove()
+        self.right_frame.grid_remove()
+        self.settings.frame.grid()
 
     def print_the_pattern(self) -> None:
         pass
 
-    def create_background(
-            self, width: str, num_of_columns: str, with_mesh: str,
-            color: str, mesh_color: str, schema: str
-            ) -> None:
+    def create_background(self, width: str, num_of_columns: str,
+                          with_mesh: str, color: str, mesh_color: str,
+                          schema: str) -> None:
 
         schema = SimplePolishSchema()
 
@@ -164,11 +157,11 @@ class PatternGenerator:
                 num_of_columns=num_of_columns,
                 color=color,
                 )
-            self.clear_info(self.img_background_settings.error_msg)
+            self.clear_info(self.settings.error_msg)
             self.init_pattern(self.background, schema)
             return self.background
         except ValueError as e:
-            self.show_info(self.img_background_settings.error_msg, e)
+            self.show_info(self.settings.error_msg, e)
 
     def init_pattern(self, background: ImageBackground, schema: Schema) -> None:
         try:
@@ -176,41 +169,37 @@ class PatternGenerator:
                 background=background,
                 schema=schema,
                 image=background.generate_image_background(),
-                start_line_width=self.pattern_settings.width.get(),
-                color=self.pattern_settings.color.get(),
+                start_line_width=self.settings.pattern_line_width.get(),
+                color=self.settings.pattern_line_color.get(),
             )
-            self.clear_info(self.pattern_settings.msg)
+            self.clear_info(self.settings.error_msg)
         except ValueError as e:
-            self.show_info(self.pattern_settings.msg, e, 'red')
+            self.show_info(self.settings.error_msg, e, 'red')
 
     def create_pattern(self) -> None:
         if not hasattr(self, 'pattern'):
             self.init_pattern()
 
-        text = self.pattern_image.text_box.get()
+        text = self.image_frame.text_box.get()
 
         try:
             setattr(self.pattern, 'text', text)
-            self.clear_info(self.pattern_image.msg)
-            self.enable_widget(self.pattern_image.save_image_btn)
+            self.clear_info(self.image_frame.msg)
+            self.enable_widget(self.image_frame.save_image_btn)
 
             self.pattern.image = self.pattern.original_background.copy()
             self.display_image(
-                self.pattern_image.drawing_area,
+                self.image_frame.drawing_area,
                 self.pattern.draw(),
                 )
         except ValueError as e:
-            if self.pattern_image.has_active_errors():
+            if self.image_frame.has_active_errors():
                 """ do not append new letters if error is active """
-                self.pattern_image.remove_last_char_from_text_var()
-            self.show_info(self.pattern_image.msg, e, 'red')
-            self.disable_widget(self.pattern_image.save_image_btn)
+                self.image_frame.remove_last_char_from_text_var()
+            self.show_info(self.image_frame.msg, e, 'red')
+            self.disable_widget(self.image_frame.save_image_btn)
 
-    def display_image(self,
-                      frame: Frame,
-                      image: Image,
-                      ) -> None:
-
+    def display_image(self, frame: Frame, image: Image,) -> None:
         img_width = image.size[0]
         img_height = image.size[1]
         frame_size = frame.winfo_width()
@@ -239,6 +228,7 @@ class PatternGenerator:
 
     @staticmethod
     def get_resized_image_in_width(image: Image, frame_size: int) -> Image:
+        """ fit image in width inside drawing frame """
         diff = frame_size - image.size[0]
         new_size = (image.size[0]+diff, image.size[1])
         wider_image = Image.new('RGB', new_size, color='white')
@@ -247,6 +237,7 @@ class PatternGenerator:
 
     @staticmethod
     def get_reisized_image_in_height(image: Image, frame_size: int) -> Image:
+        """ fit image in height inside drawing frame """
         diff = frame_size - image.size[1]
         new_size = (image.size[0], image.size[1] + diff)
         higher_image = Image.new('RGB', new_size, color='white')
@@ -263,69 +254,31 @@ class PatternGenerator:
 
     def save_the_image(self) -> None:
         resolution = self.get_resolution()
-        pattern = self.get_resized_pattern_obj(resolution)
-        name = self.pattern_image.prepare_name_of_image()
+        name = self.image_frame.prepare_name_of_image()
 
         if len(name) == 0:
             info = 'You cannot save pattern without any letters'
-            self.show_info(self.pattern_image.msg, info, 'red')
+            self.show_info(self.image_frame.msg, info, 'red')
             return
 
-        root_path = os.path.dirname(sys.argv[0])
-        folder_name = f'Patterns-{datetime.date.today()}'
-        path = f'{root_path}/{folder_name}/'
-        if not os.path.exists(path):
-            os.mkdir(path)
+        image_exporter = ImageExporter(
+            resolution, name, self.background, self.settings, self.pattern)
+        try:
+            path = image_exporter.prepare_path()
+        except(RuntimeError, OSError) as e:
+            self.show_info(self.image_frame.msg, e, 'red')
 
-        image = pattern.get_printable_version()
-
-        path = path + name
-        ext = '.jpg'
-        full_path = path + ext
-
-        if os.path.exists(full_path):
-            counter = 1
-            while os.path.exists(path + str(counter) + ext) and counter < 30:
-                counter += 1
-            if counter == 30:
-                info = f'Max number of files with name {name} reached'
-                self.show_info(self.pattern_image.msg, info, 'red')
-                return
-            name = name+str(counter)
-            full_path = path + str(counter) + ext
-
-        image.save(full_path, quality=100, format='jpeg')
-        info = f'Done, pattern available in {full_path}'
-        self.show_info(self.pattern_image.msg, info, 'green')
+        image_exporter.save(path)
+        info = f'Done, pattern available in {path}'
+        self.show_info(self.image_frame.msg, info, 'green')
 
     def get_resolution(self) -> tuple:
-        res = self.pattern_image.resolution_input.get()
+        res = self.image_frame.resolution_input.get()
         res_tuple = re.search(r'\((.*?)\)', res).groups(0)[0]
         res_tuple = res_tuple.split(',')
         res_tuple[0] = int(res_tuple[0])
         res_tuple[1] = int(res_tuple[1])
         return tuple(res_tuple)
-
-    def get_resized_pattern_obj(self, resolution: tuple) -> Pattern:
-
-        new_background = ImageBackground(
-            width=resolution[0],
-            schema=self.background.schema,
-            with_mesh=self.background.with_mesh,
-            mesh_color=self.background.mesh_color,
-            num_of_columns=self.background.num_of_colums,
-            color=self.background.color,
-            )
-
-        pattern = Pattern(
-            background=new_background,
-            image=new_background.generate_image_background(),
-            schema=new_background.schema,
-            start_line_width=self.pattern_settings.width.get(),
-            color=self.pattern_settings.color.get(),
-            text=self.pattern.text,
-        )
-        return pattern
 
     def disable_children(self, parent: Frame) -> None:
         for child in parent.winfo_children():
@@ -352,17 +305,6 @@ class PatternGenerator:
     def remove_children(self, parent) -> None:
         for child in parent.winfo_children():
             child.destroy()
-
-    def text_callback(self, *args):
-        self.create_pattern()
-
-    def get_icon_path(self) -> None:
-        relative_path = 'GUI/setting-icon.png'
-        try:
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.abspath(".")
-        return os.path.join(base_path, relative_path)
 
 
 if __name__ == '__main__':

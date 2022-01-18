@@ -2,48 +2,13 @@ from tkinter import (
     Label,
     Button,
     Frame,
-    IntVar,
     StringVar,
     Entry,
-    PhotoImage,
     OptionMenu,
     )
 
 
-class PatternSettings:
-    def __init__(self, master):
-        self.frame = Frame(master, bg='white')
-        self.frame.grid(row=2, column=0, padx=10, pady=5)
-
-        self.msg = Label(self.frame)
-        Label(self.frame, bg='white', text='Pattern settings: ').grid(
-            row=0, columnspan=2, pady=10)
-        Label(self.frame,
-              text='Pattern line width: ', bg='white').grid(row=1, column=0, pady=10)
-        self.width_input = IntVar()
-
-        self.width = Entry(
-            self.frame, textvariable=self.width_input, bg='white')
-        self.width.grid(row=1, column=1)
-        self.width.name = 'width'
-        Label(self.frame,
-              text='Line color: ', bg='white').grid(row=2, column=0, pady=10)
-        self.color_input = StringVar()
-        self.color = Entry(
-            self.frame, textvariable=self.color_input, bg='white')
-        self.color.grid(row=2, column=1)
-        self.color.name = 'color'
-        self.set_default_values()
-
-    def set_default_values(self) -> None:
-        self.width_input.set(0)
-        self.color_input.set('#000000')
-
-    def has_active_errors(self) -> None:
-        return self.msg.grid_info()
-
-
-class PatternImage:
+class ImageFrame:
     def __init__(self, master):
         self.width = int(master.winfo_screenwidth()//3)
         self.height = self.width

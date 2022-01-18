@@ -97,7 +97,7 @@ class ImageBackground:
         horizontal = self.width >= self.height
         resolutions = []
 
-        original = f'original ({self.width},{self.height})'
+        original = f'Current size ({self.width},{self.height})'
         if horizontal:
             a4_300_dpi = f'A4 - 300 DPI ({3508},{self._get_predicted_height(3508)})'
             a3_300_dpi = f'A3 - 300 DPI ({4960},{self._get_predicted_height(4960)})'
