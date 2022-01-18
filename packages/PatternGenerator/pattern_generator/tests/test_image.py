@@ -176,7 +176,7 @@ def test_create_Patter_with_int_text_raise_exception(pattern_params) -> None:
 
 
 def test_pattern_draw_method(pattern) -> None:
-    assert isinstance(pattern.draw(), PIL_Image)
+    assert isinstance(pattern.draw('test'), PIL_Image)
 
 
 def test_creating_lines_with_non_default_color(pattern_params) -> None:
@@ -187,7 +187,7 @@ def test_creating_lines_with_non_default_color(pattern_params) -> None:
 
 def test_GetPrintableVersion_method(pattern_params) -> None:
     pattern = Pattern(**pattern_params)
-    default_image = pattern.draw()
+    default_image = pattern.draw('testtext')
     font_size = pattern._calculate_printable_font_size()
     rows_to_be_added = pattern._calculate_nums_of_rows_for_text(font_size)
     new_height = default_image.size[1] + \

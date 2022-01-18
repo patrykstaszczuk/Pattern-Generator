@@ -64,7 +64,7 @@ class PatternGenerator:
         self.invoke_create_background()
         if self.settings.has_active_errors():
             return
-        self.create_pattern()
+        self.draw_pattern()
         self.show_drawing_frame()
 
     def bind_restore_default_settings_btn(self) -> Button:
@@ -98,12 +98,12 @@ class PatternGenerator:
     def bind_pattern_image_text_input(self) -> None:
         self.image_frame.clear_text_btn['command'] = \
             lambda: [self.image_frame.clear_text(),
-                     self.create_pattern()]
+                     self.draw_pattern()]
         self.image_frame.text_var.trace_add(
             'write', self.text_callback)
 
     def text_callback(self, *args):
-        self.create_pattern()
+        self.draw_pattern()
 
     def bind_pattern_image_buttons(self) -> None:
         self.image_frame.save_image_btn['command'] = lambda: self.save_the_image(
@@ -176,22 +176,20 @@ class PatternGenerator:
         except ValueError as e:
             self.show_info(self.settings.error_msg, e, 'red')
 
-    def create_pattern(self) -> None:
+    def draw_pattern(self) -> None:
         if not hasattr(self, 'pattern'):
             self.init_pattern()
 
         text = self.image_frame.text_box.get()
 
         try:
-            setattr(self.pattern, 'text', text)
-            self.clear_info(self.image_frame.msg)
-            self.enable_widget(self.image_frame.save_image_btn)
-
-            self.pattern.image = self.pattern.original_background.copy()
+            image = self.pattern.draw(text)
             self.display_image(
                 self.image_frame.drawing_area,
-                self.pattern.draw(),
+                image
                 )
+            self.clear_info(self.image_frame.msg)
+            self.enable_widget(self.image_frame.save_image_btn)
         except ValueError as e:
             if self.image_frame.has_active_errors():
                 """ do not append new letters if error is active """

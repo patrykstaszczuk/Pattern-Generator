@@ -37,55 +37,78 @@ class Pattern:
         self.original_background = image.copy()
         self.schema = schema
         self.text = text
+        self.prev_text = self.text
         self.color = color
         self.start_line_width = start_line_width
 
         self.width = image.size[0]
         self.height = image.size[1]
 
+        self.existing_letter_pairs = {}
+
     def _calculate_line_width(self) -> int:
         """ calculate line width based on image width """
         return self.image.width//1000
 
-    def draw(self) -> PIL_Image:
+    def draw(self, text: str) -> PIL_Image:
         """ generate lines on given image based on provided parameters """
+        setattr(self, 'text', text)
+        if len(self.prev_text) == 0 or self.prev_text != text[:-1]:
+            self.redraw()
+        else:
+            self.draw_new_line()
+        self.prev_text = self.text
+        return self.image
+
+    def draw_new_line(self) -> PIL_Image:
         draw = ImageDraw.Draw(self.image)
         mapping = self.background.mapping
-        existing_letter_pairs = {}
+        self.draw_line(self.prev_text[-1], self.text[-1], draw, mapping)
+
+    def redraw(self) -> PIL_Image:
+        self.image = self.original_background.copy()
+        draw = ImageDraw.Draw(self.image)
+        mapping = self.background.mapping
+        self.existing_letter_pairs = {}
         for i, value in enumerate(self.text):
             if i == len(self.text) - 1:
                 break
-            if any([self.text[i] == ' ', self.text[i+1] == ' ']):
-                continue
+            self.draw_line(self.text[i], self.text[i+1], draw, mapping)
 
-            line_start_point = mapping[value.lower()]
-            line_end_point = mapping[self.text[i+1].lower()]
-            pair = self.text[i] + self.text[i+1]
-            if pair in list(existing_letter_pairs.keys()):
-                existing_letter_pairs.update(
-                    {pair: existing_letter_pairs[pair] + self.start_line_width*2})
-                width = existing_letter_pairs[pair]
-            elif pair[::-1] in list(existing_letter_pairs.keys()):
-                existing_letter_pairs.update(
-                    {pair[::-1]: existing_letter_pairs[pair[::-1]] + self.start_line_width*2})
-                width = existing_letter_pairs[pair[::-1]]
-            else:
-                existing_letter_pairs.update({pair: 1})
-                width = self.start_line_width
-            draw.line((line_start_point[0], line_start_point[1], line_end_point[0],
-                       line_end_point[1]), fill=self.color, width=width)
-        return self.image
+    def draw_line(self, a: str, b: str, draw: ImageDraw, mapping: dict) -> None:
+        if any([a == ' ', b == ' ']):
+            return
+        line_start_point = mapping[a.lower()]
+        line_end_point = mapping[b.lower()]
+        pair = a + b
+        width_of_line = self._get_line_width(pair)
+        draw.line((line_start_point[0], line_start_point[1], line_end_point[0],
+                   line_end_point[1]), fill=self.color, width=width_of_line)
+
+    def _get_line_width(self, pair: str) -> None:
+        if pair in list(self.existing_letter_pairs.keys()):
+            self.existing_letter_pairs.update(
+                {pair: self.existing_letter_pairs[pair] + self.start_line_width*2})
+            width = self.existing_letter_pairs[pair]
+        elif pair[::-1] in list(self.existing_letter_pairs.keys()):
+            self.existing_letter_pairs.update(
+                {pair[::-1]: self.existing_letter_pairs[pair[::-1]] + self.start_line_width*2})
+            width = self.existing_letter_pairs[pair[::-1]]
+        else:
+            self.existing_letter_pairs.update({pair: 1})
+            width = self.start_line_width
+        return width
 
     def get_printable_version(self) -> PIL_Image:
-        image = self.draw()
-
+        # need to redraw becouse there is new Pattern obj created
+        self.redraw()
         font_size = self._calculate_printable_font_size()
         rows_to_be_added = self._calculate_nums_of_rows_for_text(font_size)
         extra_space = self._calculate_extra_space(font_size, rows_to_be_added)
 
         new_image_size = (self.width, self.height + extra_space)
         img_with_space = PIL_Image.new('RGB', new_image_size, color='white')
-        img_with_space.paste(image)
+        img_with_space.paste(self.image)
 
         img_with_text = self._add_text_to_printable_image(
             img_with_space, font_size, rows_to_be_added)
@@ -118,24 +141,6 @@ class Pattern:
             draw.text((0 + left_padding, text_hight),
                       text=line, font=font, fill='black')
             text_hight += height
-
-        # to be discused which version is better
-
-        # from right version:
-
-        # right_pading = font_size
-        # for line in lines:
-        #     width, height = font.getsize(line)
-        #     draw.text(((self.width - width) - right_pading, text_hight),
-        #               line, font=font, fill='black')
-        #     text_hight += height
-
-        # centered version:
-        # for line in text_lines:
-        #     width, height = font.getsize(line)
-        #     draw.text(((self.width - width) / 2, text_hight),
-        #               line, font=font, fill='black')
-        #     text_hight += height
 
         return img
 
