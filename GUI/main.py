@@ -1,7 +1,6 @@
 import os
 import sys
 import re
-import time
 from tkinter import (
     Tk,
     Label,

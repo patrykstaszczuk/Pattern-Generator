@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import patch, Mock
 from pattern_generator.background import ImageBackground
 from pattern_generator.pattern import Pattern
+from pattern_generator.pattern_exporter import PatternExporter
 from pattern_generator.schemas import SimplePolishSchema, Schema
 from PIL.Image import Image as PIL_Image
 from PIL import ImageFont
@@ -188,10 +189,33 @@ def test_creating_lines_with_non_default_color(pattern_params) -> None:
 def test_GetPrintableVersion_method(pattern_params) -> None:
     pattern = Pattern(**pattern_params)
     default_image = pattern.draw('testtext')
-    font_size = pattern._calculate_printable_font_size()
-    rows_to_be_added = pattern._calculate_nums_of_rows_for_text(font_size)
+
+    pattern_exporter = PatternExporter(pattern)
+
+    font_size = pattern_exporter._calculate_printable_font_size()
+    rows_to_be_added = pattern_exporter._calculate_nums_of_rows_for_text(
+        font_size, pattern.text)
     new_height = default_image.size[1] + \
-        pattern._calculate_extra_space(font_size, rows_to_be_added)
-    image = pattern.get_printable_version()
+        pattern_exporter._calculate_extra_space(font_size, rows_to_be_added)
+    image = pattern_exporter.get_printable_version()
     assert image.size[1] == new_height
     assert image.size[1] == new_height
+
+
+@patch('pattern_generator.Pattern.redraw')
+def test_Draw_with_different_prev__text_should_invoke_redraw_method(mock, pattern_params) -> None:
+    """ testing what happen when user deletes text or change letters inside the text """
+    pattern = Pattern(**pattern_params)
+    pattern.prev_text = 'testowy tekst'
+    text = 'testowy ale zmieniony tekst'
+    with pattern.draw(text):
+        mock.assert_called_once()
+
+
+@patch('pattern_generator.Pattern.draw_new_line')
+def test_Draw_method_with_new_letter_should_invoke_drawNewLine_method(mock, pattern_params) -> None:
+    pattern = Pattern(**pattern_params)
+    pattern.prev_text = 'testowy tekst'
+    text = pattern.prev_text + 's'
+    with pattern.draw(text):
+        mock.assert_called_once()

@@ -44,9 +44,9 @@ class ImageFrame:
             text_box_frame, text='clear', pady=2, padx=2)
         self.clear_text_btn.grid(row=3, column=1, sticky='w')
 
-        self.buttons_frame = Frame(self.center)
+        self.buttons_frame = Frame(self.center, bg='white')
         self.buttons_frame.grid(row=4, pady=5, columnspan=2)
-        Label(self.buttons_frame, text='Save the image: ').grid(
+        Label(self.buttons_frame, text='Save the image: ', bg='white').grid(
             row=0, columnspan=3, pady=10)
         self.save_image_btn = Button(self.buttons_frame, pady=3, padx=10,
                                      text='Save', state='normal',

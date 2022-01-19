@@ -5,7 +5,7 @@ import sys
 from PIL import Image
 
 from pattern_generator import Pattern
-from pattern_generator import ImageBackground
+from pattern_generator import ImageBackground, PatternExporter
 from settings import ImageSettings
 
 
@@ -26,7 +26,10 @@ class ImageExporter:
 
     def save(self, path: str) -> None:
         pattern_obj = self.get_resized_pattern_object()
-        image = pattern_obj.get_printable_version()
+
+        pattern_exporter = PatternExporter(pattern_obj)
+
+        image = pattern_exporter.get_printable_version(self.name)
         image.save(path, quality=100)
 
     def get_resized_pattern_object(self) -> Image:
