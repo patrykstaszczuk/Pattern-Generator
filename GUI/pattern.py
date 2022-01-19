@@ -82,6 +82,7 @@ class ImageFrame:
 
     def refresh_resolutions(self, resolution: list[str]) -> None:
         self.resolution.grid_forget()
+        
         self.resolution = OptionMenu(
             self.buttons_frame, self.resolution_input, resolution[0], *resolution)
         self.resolution.grid(row=1, column=2)
