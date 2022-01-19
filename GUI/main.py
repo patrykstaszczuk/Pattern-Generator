@@ -3,10 +3,8 @@ import sys
 import re
 from tkinter import (
     Tk,
-    Label,
-    Button,
-    Frame,
     )
+from tkinter.ttk import Label, Button, Frame, Style
 from PIL import Image, ImageTk
 
 from pattern_generator import ImageBackground, SimplePolishSchema, Pattern, Schema
@@ -19,6 +17,7 @@ class PatternGenerator:
     def __init__(
             self,
             master: Tk,
+            style: Style,
             ):
         self.master = master
         self.width = master.winfo_screenwidth()
@@ -28,11 +27,11 @@ class PatternGenerator:
         master.configure(bg='white')
 
         self.settings_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height, bg='white')
+            self.master, width=(self.width//4) - 10, height=self.height)
         self.drawing_frame = Frame(
-            self.master, width=(self.width//2) - 10, height=self.height, bg='white')
+            self.master, width=(self.width//2) - 10, height=self.height)
         self.right_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height, bg='white')
+            self.master, width=(self.width//4) - 10, height=self.height)
 
         self.settings_frame.grid(row=0, column=1, padx=5)
         self.settings_frame.grid_propagate(0)
@@ -42,10 +41,13 @@ class PatternGenerator:
         self.right_frame.grid_propagate(0)
 
         self.settings = ImageSettings(self.settings_frame)
-        self.image_frame = ImageFrame(self.drawing_frame)
+        self.image_frame = ImageFrame(self.drawing_frame, style)
 
         self.background = self.invoke_create_background()
         self.show_config_btn = self.set_config_button()
+
+        self.error = 'Error.TLabel'
+        self.success = 'Success.TLabel'
 
         self.bind_save_settings_btn()
         self.bind_restore_default_settings_btn()
@@ -76,8 +78,6 @@ class PatternGenerator:
 
         btn = Button(self.settings_frame, state='normal',
                      image=setting_icon,
-                     width=12,
-                     height=12,
                      )
         btn.image = setting_icon
         btn.grid(row=0, sticky='w')
@@ -132,6 +132,26 @@ class PatternGenerator:
         self.right_frame.grid_remove()
         self.settings.frame.grid()
 
+    # def display_current_settings(self) -> None:
+    #     Label(self.right_frame, text='Current Settings:',
+    #           style='Header.TLabel').pack()
+    #     Label(self.right_frame,
+    #           text=f'Image width: {self.settings.background_width.get()}').pack(anchor='w')
+    #     Label(self.right_frame,
+    #           text=f'Letters in row: {self.settings.num_of_columns.get()}').pack(anchor='w')
+    #     Label(self.right_frame,
+    #           text=f'With mesh: {self.settings.with_mesh_input.get()}').pack(anchor='w')
+    #     Label(self.right_frame,
+    #           text=f'background_color: {self.settings.background_color.get()}').pack(anchor='w')
+    #     Label(self.right_frame,
+    #           text=f'Mesh color: {self.settings.mesh_color.get()}').pack(anchor='w')
+    #     Label(self.right_frame,
+    #           text=f'Schema: {self.settings.schema_input.get()}').pack(anchor='w')
+    #     Label(self.right_frame,
+    #           text=f'Pattern line width: {self.settings.pattern_line_width.get()}').pack(anchor='w')
+    #     Label(self.right_frame,
+    #           text=f'Line color: {self.settings.pattern_line_color.get()}').pack(anchor='w')
+
     def print_the_pattern(self) -> None:
         pass
 
@@ -178,7 +198,7 @@ class PatternGenerator:
                 background_img.width, background_img.height)
             self.clear_info(self.settings.error_msg)
         except ValueError as e:
-            self.show_info(self.settings.error_msg, e, 'red')
+            self.show_info(self.settings.error_msg, e, self.error)
 
     def draw_pattern(self) -> None:
         if not hasattr(self, 'pattern'):
@@ -198,7 +218,7 @@ class PatternGenerator:
             if self.image_frame.has_active_errors():
                 """ do not append new letters if error is active """
                 self.image_frame.remove_last_char_from_text_var()
-            self.show_info(self.image_frame.msg, e, 'red')
+            self.show_info(self.image_frame.msg, e, self.error)
             self.disable_widget(self.image_frame.save_image_btn)
 
     def display_image(self, frame: Frame, image: Image,) -> None:
@@ -214,7 +234,7 @@ class PatternGenerator:
             image = self.get_reisized_image_in_height(image, frame_size)
 
         img = ImageTk.PhotoImage(image=image)
-        label = Label(frame, image=img, bg='white')
+        label = Label(frame, image=img)
         label.image = img
         label.grid()
 
@@ -239,9 +259,12 @@ class PatternGenerator:
     def clear_info(self, label: Label) -> None:
         label.grid_remove()
 
-    def show_info(self, label: Label, info: str, bg_color: str = 'red') -> None:
+    def show_info(self, label: Label, info: str, style: str = None) -> None:
+        if style is None:
+            style = self.error
         label['text'] = f'{info}'
-        label['fg'] = bg_color
+        label['style'] = style
+        label['padding'] = 5
         label.grid(columnspan=3)
 
     def save_the_image(self) -> None:
@@ -250,19 +273,19 @@ class PatternGenerator:
 
         if len(name) == 0:
             info = 'You cannot save pattern without any letters'
-            self.show_info(self.image_frame.msg, info, 'red')
+            self.show_info(self.image_frame.msg, info, self.error)
             return
-
+        original_text = self.image_frame.text_var.get()
         image_exporter = ImageExporter(
-            resolution, name, self.background, self.settings, self.pattern)
+            resolution, name, self.background, self.settings, self.pattern, original_text)
         try:
             path = image_exporter.prepare_path()
         except(RuntimeError, OSError) as e:
-            self.show_info(self.image_frame.msg, e, 'red')
+            self.show_info(self.image_frame.msg, e, self.error)
 
         image_exporter.save(path)
         info = f'Done, pattern available in {path}'
-        self.show_info(self.image_frame.msg, info, 'green')
+        self.show_info(self.image_frame.msg, info, self.success)
 
     def get_resolution(self) -> tuple:
         res = self.image_frame.resolution_input.get()
@@ -301,5 +324,24 @@ class PatternGenerator:
 
 if __name__ == '__main__':
     root = Tk()
-    my_gui = PatternGenerator(root)
+
+    style = Style()
+    style.theme_use('clam')
+    style.configure('TFrame', background='white', )
+    style.configure('Test.TFrame', background='red', )
+
+    style.configure('TButton', background='white')
+
+    style.configure('TLabel', background='white')
+    style.configure('Header.TLabel', font=('Times', 18))
+
+    style.configure('TEnter', background='white')
+
+    style.configure('Error.TLabel', foreground='#F45D5D')
+    style.configure('Success.TLabel', foreground='#1FCC4E')
+
+    style.configure('TRadiobutton', background='white')
+    style.configure('TOptionmenu', background='white')
+
+    my_gui = PatternGenerator(root, style)
     root.mainloop()

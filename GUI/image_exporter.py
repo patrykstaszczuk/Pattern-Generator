@@ -17,19 +17,22 @@ class ImageExporter:
             background: ImageBackground,
             settings: ImageSettings,
             pattern: Pattern,
+            original_text: str
             ) -> None:
+
         self.resolution = resolution
         self.name = name
         self.background = background
         self.settings = settings
         self.pattern = pattern
+        self.original_text = original_text
 
     def save(self, path: str) -> None:
         pattern_obj = self.get_resized_pattern_object()
 
-        pattern_exporter = PatternExporter(pattern_obj)
+        pattern_exporter = PatternExporter(pattern_obj, self.original_text)
 
-        image = pattern_exporter.get_printable_version(self.name)
+        image = pattern_exporter.get_printable_version()
         image.save(path, quality=100)
 
     def get_resized_pattern_object(self) -> Image:

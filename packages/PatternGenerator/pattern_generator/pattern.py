@@ -25,7 +25,9 @@ class Pattern:
         self.image = image
         self.original_background = image.copy()
         self.schema = schema
+
         self.text = text
+        self.original_text_with_punctuation = text
         self.prev_text = self.text
         self.color = color
         self.start_line_width = start_line_width
@@ -44,9 +46,7 @@ class Pattern:
     def draw(self, text: str) -> PIL_Image:
         """ generate lines on given image based on provided parameters """
         setattr(self, 'text', text)
-        if len(self.prev_text) == 0:
-            pass
-        elif self.prev_text != text[:-1]:
+        if len(self.prev_text) == 0 or self.prev_text != text[:-1]:
             self.redraw()
         else:
             self.draw_new_line()
@@ -66,7 +66,7 @@ class Pattern:
         return self.image
 
     def draw_line(self, a: str, b: str) -> None:
-        if any([a == ' ', b == ' ']):
+        if any([a == ' ', b == ' ']) or any([a in string.punctuation, b in string.punctuation]):
             return
         line_start_point = self.mapping[a]
         line_end_point = self.mapping[b]
@@ -107,9 +107,12 @@ class Pattern:
             raise ValueError('Text must be a string')
         translator = str.maketrans(
             string.punctuation, ' '*len(string.punctuation))
+        self.original_text_with_punctuation = value
         value = value.translate(translator)
         value = value.lower()
         for char in value:
+            if char in string.punctuation:
+                continue
             if char not in self.schema.get_letters() and char != ' ':
                 raise ValueError(
                     f'Given schema does not support char "{char}"')

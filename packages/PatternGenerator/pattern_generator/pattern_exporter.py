@@ -21,19 +21,19 @@ class PatternExporter:
     def __init__(
             self,
             pattern: PIL_Image,
+            original_text: str
             ) -> None:
+
         self.image = pattern.redraw()
         self.width = pattern.width
         self.height = pattern.height
-        self.text = pattern.text
+        self.text = original_text  # for keeping punctuations
 
-    def get_printable_version(self, text: str = None) -> PIL_Image:
-        # need to redraw becouse there is new Pattern obj created
-        if text is None:
-            text = self.text
+    def get_printable_version(self) -> PIL_Image:
+
         font_size = self._calculate_printable_font_size()
         rows_to_be_added = self._calculate_nums_of_rows_for_text(
-            font_size, text)
+            font_size, self.text)
         extra_space = self._calculate_extra_space(font_size, rows_to_be_added)
 
         new_image_size = (self.width, self.height + extra_space)
@@ -41,7 +41,7 @@ class PatternExporter:
         img_with_space.paste(self.image)
 
         img_with_text = self._add_text_to_printable_image(
-            img_with_space, font_size, rows_to_be_added, text)
+            img_with_space, font_size, rows_to_be_added, self.text)
         return img_with_text
 
     def _calculate_extra_space(self, font_size: int, rows_to_be_added: int) -> int:
