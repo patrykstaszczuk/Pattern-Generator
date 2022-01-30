@@ -13,11 +13,11 @@ from tkinter.ttk import (
 
 class ImageFrame:
     def __init__(self, master, style: Style):
-        style.configure('Clear.TButton', background='white',
-                        padding=0, width=5)
+        style.configure('Local.TButton', background='white',
+                        padding=0, width=10)
 
         self.master = master
-        self.width = int(master.winfo_screenwidth()//2.6)
+        self.width = int(master.winfo_screenwidth()//2.8)
         self.height = self.width
         self.left_side = Frame(master, width=80)
         self.right_side = Frame(master, width=80)
@@ -30,46 +30,34 @@ class ImageFrame:
         self.right_side.grid_propagate(0)
 
         self.drawing_area = Frame(
-            self.center, width=self.width, height=self.height, )
+            self.center, width=self.width, height=self.height)
         self.drawing_area.grid(row=1)
         self.drawing_area.grid_propagate(0)
 
-        self.msg = Label(self.center)
-
-        Label(self.center,
-              text='Type your text here...', style='Header.TLabel').grid(row=2)
-        text_box_frame = Frame(self.center)
-        text_box_frame.grid(row=3)
+        self.pattern_text_box_frame = Frame(self.center, padding=50)
+        self.pattern_text_box_frame.grid(row=3, columnspan=2)
+        Label(self.pattern_text_box_frame, text='Type your text here:').grid(
+            row=0, column=0)
         self.text_var = StringVar()
-        self.text_box = Entry(text_box_frame, state='normal',
+        self.text_box = Entry(self.pattern_text_box_frame, state='normal',
                               textvariable=self.text_var)
-
-        self.text_box.grid(row=3, column=0)
+        self.text_box.grid(row=1, column=0, columnspan=2)
         self.clear_text_btn = Button(
-            text_box_frame, text='clear', style='Clear.TButton')
-        self.clear_text_btn.grid(row=3, column=1, sticky='w')
+            self.pattern_text_box_frame, text='clear', style='Local.TButton')
+        self.clear_text_btn.grid(row=1, column=2, sticky='w')
+        self.export_image_btn = Button(
+            self.pattern_text_box_frame, text='export', style='Local.TButton')
+        self.export_image_btn.grid(row=1, column=3, sticky='w')
 
-        self.buttons_frame = Frame(self.center, padding=20)
-        self.buttons_frame.grid(row=4, columnspan=2)
-        Label(self.buttons_frame, text='Save the image: ', style='Header.TLabel').grid(
-            row=0, columnspan=3,)
-        self.save_image_btn = Button(
-            self.buttons_frame, text='Save', state='normal')
-        self.save_image_btn.grid(row=1, column=0)
+        self.msg = Label(self.pattern_text_box_frame)
+        self.msg.grid(row=2, columnspan=4)
+        self.msg.grid_remove()
 
-        self.resolution_input = StringVar()
-        self.resolution = OptionMenu(
-            self.buttons_frame, self.resolution_input, 'None')
-        # Label(self.buttons_frame, text='..or print direclty: ').grid(
-        #     row=2, columnspan=3, pady=10)
-        self.print_btn = Button(
-            self.buttons_frame, text='Print', state='disabled')
-        #self.print_btn.grid(row=3, columnspan=3)
 
     def clear_text(self) -> None:
         self.text_var.set('')
 
-    def has_active_errors(self) -> None:
+    def has_active_message(self) -> None:
         return self.msg.grid_info()
 
     def remove_last_char_from_text_var(self) -> None:
@@ -79,13 +67,6 @@ class ImageFrame:
     def prepare_name_of_image(self) -> None:
         text = self.text_var.get()
         return text[:25]
-
-    def refresh_resolutions(self, resolution: list[str]) -> None:
-        self.resolution.grid_forget()
-        
-        self.resolution = OptionMenu(
-            self.buttons_frame, self.resolution_input, resolution[0], *resolution)
-        self.resolution.grid(row=1, column=2)
 
     def calculate_preview_image_dimensions(self, width: int, height: int) -> None:
         self.preview_image_width = width
@@ -100,3 +81,25 @@ class ImageFrame:
             height_ratio = height/frame_size
             self.preview_image_height = frame_size
             self.preview_image_width = width/height_ratio
+
+    def disable_typing(self) -> None:
+        self._disable_children(self.pattern_text_box_frame)
+
+    def enable_typing(self) -> None:
+        self._enable_children(self.pattern_text_box_frame)
+
+    def _disable_children(self, parent: Frame) -> None:
+        for child in parent.winfo_children():
+            wtype = child.winfo_class()
+            if wtype not in ('Frame', 'Labelframe'):
+                child.configure(state='disable')
+            else:
+                self.disable_children(child)
+
+    def _enable_children(self, parent: Frame) -> None:
+        for child in parent.winfo_children():
+            wtype = child.winfo_class()
+            if wtype not in ('Frame', 'Labelframe'):
+                child.configure(state='normal')
+            else:
+                self.enable_children(child)

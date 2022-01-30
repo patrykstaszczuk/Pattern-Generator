@@ -3,6 +3,7 @@ import sys
 import re
 from tkinter import (
     Tk,
+
     )
 from tkinter.ttk import Label, Button, Frame, Style
 from PIL import Image, ImageTk
@@ -10,7 +11,8 @@ from PIL import Image, ImageTk
 from pattern_generator import ImageBackground, SimplePolishSchema, Pattern, Schema
 from pattern import ImageFrame
 from settings import ImageSettings
-from image_exporter import ImageExporter
+from export import ImageExportFrame
+from utils.image_exporter import ImageExporter
 
 
 class PatternGenerator:
@@ -42,6 +44,7 @@ class PatternGenerator:
 
         self.settings = ImageSettings(self.settings_frame)
         self.image_frame = ImageFrame(self.drawing_frame, style)
+        self.image_export_frame = ImageExportFrame(self.right_frame, style)
 
         self.background = self.invoke_create_background()
         self.show_config_btn = self.set_config_button()
@@ -53,6 +56,7 @@ class PatternGenerator:
         self.bind_restore_default_settings_btn()
         self.bind_pattern_image_text_input()
         self.bind_pattern_image_buttons()
+        self.bind_export_image_buttons()
         self.show_drawing_frame()
 
     def bind_save_settings_btn(self) -> Button:
@@ -62,7 +66,7 @@ class PatternGenerator:
 
     def save_settings(self) -> None:
         self.invoke_create_background()
-        if self.settings.has_active_errors():
+        if self.settings.has_active_message():
             return
         self.draw_pattern()
         self.show_drawing_frame()
@@ -104,9 +108,15 @@ class PatternGenerator:
         self.draw_pattern()
 
     def bind_pattern_image_buttons(self) -> None:
-        self.image_frame.save_image_btn['command'] = lambda: self.save_the_image(
+        self.image_frame.export_image_btn['command'] = lambda: self.show_export_panel(
         )
-        self.image_frame.print_btn['command'] = lambda: self.print_the_pattern(
+
+    def bind_export_image_buttons(self) -> None:
+        self.image_export_frame.save_image_btn['command'] = lambda: self.save_the_image(
+        )
+        self.image_export_frame.print_btn['command'] = lambda: self.print_the_pattern(
+        )
+        self.image_export_frame.back_to_typing_btn['command'] = lambda: self.close_export_panel(
         )
 
     def invoke_create_background(self) -> None:
@@ -119,13 +129,23 @@ class PatternGenerator:
             self.settings.mesh_color.get(),
             self.settings.schema_input.get())
 
+    def show_export_panel(self) -> None:
+        resolutions = self.background.get_available_resolutions()
+        self.image_export_frame.refresh_resolutions(resolutions)
+        self.right_frame.grid()
+        self.image_frame.disable_typing()
+        self.show_config_btn.configure(state='disabled')
+
+    def close_export_panel(self) -> None:
+        self.right_frame.grid_remove()
+        self.image_export_frame.remove_message()
+        self.image_frame.enable_typing()
+        self.show_config_btn.configure(state='normal')
+
     def show_drawing_frame(self) -> None:
         self.settings.frame.grid_remove()
+        self.right_frame.grid_remove()
         self.drawing_frame.grid()
-        self.right_frame.grid()
-
-        resolutions = self.background.get_available_resolutions()
-        self.image_frame.refresh_resolutions(resolutions)
 
     def show_config(self) -> None:
         self.drawing_frame.grid_remove()
@@ -213,13 +233,13 @@ class PatternGenerator:
                 image
                 )
             self.clear_info(self.image_frame.msg)
-            self.enable_widget(self.image_frame.save_image_btn)
+            self.enable_widget(self.image_frame.export_image_btn)
         except ValueError as e:
-            if self.image_frame.has_active_errors():
+            if self.image_frame.has_active_message():
                 """ do not append new letters if error is active """
                 self.image_frame.remove_last_char_from_text_var()
             self.show_info(self.image_frame.msg, e, self.error)
-            self.disable_widget(self.image_frame.save_image_btn)
+            self.disable_widget(self.image_frame.export_image_btn)
 
     def display_image(self, frame: Frame, image: Image,) -> None:
         frame_size = frame.winfo_width()
@@ -265,15 +285,15 @@ class PatternGenerator:
         label['text'] = f'{info}'
         label['style'] = style
         label['padding'] = 5
-        label.grid(columnspan=3)
+        label.grid()
 
     def save_the_image(self) -> None:
-        resolution = self.get_resolution()
+        resolution = self.image_export_frame.get_current_resolution()
         name = self.image_frame.prepare_name_of_image()
 
         if len(name) == 0:
             info = 'You cannot save pattern without any letters'
-            self.show_info(self.image_frame.msg, info, self.error)
+            self.show_info(self.image_export_frame.msg, info, self.error)
             return
         original_text = self.image_frame.text_var.get()
         image_exporter = ImageExporter(
@@ -281,19 +301,11 @@ class PatternGenerator:
         try:
             path = image_exporter.prepare_path()
         except(RuntimeError, OSError) as e:
-            self.show_info(self.image_frame.msg, e, self.error)
+            self.show_info(self.image_export_frame.msg, e, self.error)
 
         image_exporter.save(path)
-        info = f'Done, pattern available in {path}'
-        self.show_info(self.image_frame.msg, info, self.success)
-
-    def get_resolution(self) -> tuple:
-        res = self.image_frame.resolution_input.get()
-        res_tuple = re.search(r'\((.*?)\)', res).groups(0)[0]
-        res_tuple = res_tuple.split(',')
-        res_tuple[0] = int(res_tuple[0])
-        res_tuple[1] = int(res_tuple[1])
-        return tuple(res_tuple)
+        info = f'Success, path to file: {path}'
+        self.show_info(self.image_export_frame.msg, info, self.success)
 
     def disable_children(self, parent: Frame) -> None:
         for child in parent.winfo_children():
@@ -333,7 +345,7 @@ if __name__ == '__main__':
     style.configure('TButton', background='white')
 
     style.configure('TLabel', background='white')
-    style.configure('Header.TLabel', font=('Times', 18))
+    style.configure('Header.TLabel', font=('Times', 15))
 
     style.configure('TEnter', background='white')
 

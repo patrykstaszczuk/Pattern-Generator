@@ -23,9 +23,8 @@ class ImageSettings:
     def __init__(self, master):
         self.frame = Frame(master, )
         self.frame.grid(row=1, column=0, pady=5, padx=10)
-        self.error_msg = Label(self.frame)
 
-        Label(self.frame, text='Background settings: ', style='Header.TLabel').grid(
+        Label(self.frame, text='Background settings: ').grid(
             row=0, columnspan=2, pady=10)
         Label(self.frame,
               text='Image width: ', ).grid(row=1, column=0, sticky='w', pady=10)
@@ -101,9 +100,15 @@ class ImageSettings:
             self.frame, text='Restore default')
         self.restore_default_settings_btn.grid(row=10, column=0, sticky='w')
 
+        self.error_msg = Label(self.frame)
+        self.error_msg.grid(row=11, columnspan=3)
+
         self.set_default_values()
 
     def set_default_values(self) -> None:
+        if self.has_active_message():
+            self.error_msg.grid_remove()
+
         self.background_width_input.set(1920)
         self.num_of_columns_input.set(7)
         self.with_mesh_input.set('no')
@@ -114,5 +119,5 @@ class ImageSettings:
         self.pattern_line_width_input.set(0)
         self.pattern_line_color_input.set('#000000')
 
-    def has_active_errors(self) -> None:
+    def has_active_message(self) -> None:
         return self.error_msg.grid_info()

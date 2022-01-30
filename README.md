@@ -11,7 +11,7 @@ You can also edit properties of the image such as:
 - letter mesh visibility 
 - line width
 
-For now app supports only polish alphabet
+For now app supports only polish alphabet.
 
 ## Example 1
 ![](images/drawing_area.png)
