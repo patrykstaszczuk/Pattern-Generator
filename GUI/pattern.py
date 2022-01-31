@@ -18,24 +18,25 @@ class ImageFrame:
 
         self.master = master
         self.width = int(master.winfo_screenwidth()//2.8)
-        self.height = self.width
+        self.height = int(master.winfo_screenheight())
         self.left_side = Frame(master, width=80)
         self.right_side = Frame(master, width=80)
-        self.center = Frame(master, width=self.width, )
+        self.center = Frame(master, width=self.width, height=self.height)
 
         self.left_side.grid(column=0)
         self.left_side.grid_propagate(0)
         self.center.grid(column=1, sticky='e')
+        self.center.grid_propagate(0)
         self.right_side.grid(column=2)
         self.right_side.grid_propagate(0)
 
         self.drawing_area = Frame(
-            self.center, width=self.width, height=self.height)
+            self.center, width=self.width, height=self.width)
         self.drawing_area.grid(row=1)
         self.drawing_area.grid_propagate(0)
 
         self.pattern_text_box_frame = Frame(self.center, padding=50)
-        self.pattern_text_box_frame.grid(row=3, columnspan=2)
+        self.pattern_text_box_frame.place(anchor='w', relx=0.2, rely=0.8)
         Label(self.pattern_text_box_frame, text='Type your text here:').grid(
             row=0, column=0)
         self.text_var = StringVar()
@@ -52,7 +53,6 @@ class ImageFrame:
         self.msg = Label(self.pattern_text_box_frame)
         self.msg.grid(row=2, columnspan=4)
         self.msg.grid_remove()
-
 
     def clear_text(self) -> None:
         self.text_var.set('')
