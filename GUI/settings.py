@@ -22,7 +22,7 @@ from tkinter.ttk import (
 class ImageSettings:
     def __init__(self, master):
         self.frame = Frame(master, )
-        self.frame.grid(row=1, column=0, pady=5, padx=10)
+        self.frame.grid(row=1, column=0, pady=5)
 
         Label(self.frame, text='Background settings: ').grid(
             row=0, columnspan=2, pady=10)

@@ -15,11 +15,10 @@ from tkinter.ttk import (
 class ImageExportFrame:
     def __init__(self, master, style: Style):
         style.configure('ImageExportLocal.TButton', width=19)
-
         self.pattern_export_frame = Frame(master)
-        self.pattern_export_frame.grid(pady=400)
+        self.pattern_export_frame.place(relx=0, rely=0.4)
         Label(self.pattern_export_frame,
-              text='Chose appropriate resolution and save/print the image').grid(row=0)
+              text='Chose resolution and save/print the image').grid(row=0)
         self.resolution_input = StringVar()
         self.resolution = OptionMenu(
             self.pattern_export_frame, self.resolution_input, 'None')

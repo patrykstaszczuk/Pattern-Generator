@@ -29,11 +29,11 @@ class PatternGenerator:
         master.configure(bg='white')
 
         self.settings_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height)
+            self.master, width=(self.width//4), height=self.height)
         self.drawing_frame = Frame(
             self.master, width=(self.width//2) - 10, height=self.height)
         self.right_frame = Frame(
-            self.master, width=(self.width//4) - 10, height=self.height)
+            self.master, width=(self.width//4), height=self.height)
 
         self.settings_frame.grid(row=0, column=1, padx=5)
         self.settings_frame.grid_propagate(0)

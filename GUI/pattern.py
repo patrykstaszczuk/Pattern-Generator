@@ -36,7 +36,7 @@ class ImageFrame:
         self.drawing_area.grid_propagate(0)
 
         self.pattern_text_box_frame = Frame(self.center, padding=50)
-        self.pattern_text_box_frame.place(anchor='w', relx=0.2, rely=0.8)
+        self.pattern_text_box_frame.place(anchor='w', relx=0.25, rely=0.8)
         Label(self.pattern_text_box_frame, text='Type your text here:').grid(
             row=0, column=0)
         self.text_var = StringVar()
