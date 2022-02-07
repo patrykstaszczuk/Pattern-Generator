@@ -28,7 +28,7 @@ class ImageExportFrame:
         self.save_image_btn.grid(row=2, column=0)
 
         self.print_btn = Button(
-            self.pattern_export_frame, text='Print', state='disabled', style='ImageExportLocal.TButton')
+            self.pattern_export_frame, text='Print', state='normal', style='ImageExportLocal.TButton')
         self.print_btn.grid(row=3, column=0)
         self.back_to_typing_btn = Button(
             self.pattern_export_frame, text='Back to typing', style='ImageExportLocal.TButton')

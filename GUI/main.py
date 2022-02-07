@@ -1,6 +1,7 @@
 import os
 import sys
-import re
+from typing import Union
+
 from tkinter import (
     Tk,
 
@@ -8,11 +9,13 @@ from tkinter import (
 from tkinter.ttk import Label, Button, Frame, Style
 from PIL import Image, ImageTk
 
+
 from pattern_generator import ImageBackground, SimplePolishSchema, Pattern, Schema
 from pattern import ImageFrame
 from settings import ImageSettings
 from export import ImageExportFrame
 from utils.image_exporter import ImageExporter
+from utils.print import PrinterManager
 
 
 class PatternGenerator:
@@ -172,9 +175,6 @@ class PatternGenerator:
     #     Label(self.right_frame,
     #           text=f'Line color: {self.settings.pattern_line_color.get()}').pack(anchor='w')
 
-    def print_the_pattern(self) -> None:
-        pass
-
     def create_background(self, width: str, num_of_columns: str,
                           with_mesh: str, color: str, mesh_color: str,
                           schema: str) -> None:
@@ -287,7 +287,7 @@ class PatternGenerator:
         label['padding'] = 5
         label.grid()
 
-    def save_the_image(self) -> None:
+    def save_the_image(self) -> Union[None, str]:
         resolution = self.image_export_frame.get_current_resolution()
         name = self.image_frame.prepare_name_of_image()
 
@@ -305,6 +305,16 @@ class PatternGenerator:
 
         image_exporter.save(path)
         info = f'Success, path to file: {path}'
+        self.show_info(self.image_export_frame.msg, info, self.success)
+        return path
+
+    def print_the_pattern(self) -> None:
+        path = self.save_the_image()
+        if not path:
+            return
+        pm = PrinterManager(path)
+        pm.printer.print()
+        info = f'Image sent to printer. Make sure that printer is on'
         self.show_info(self.image_export_frame.msg, info, self.success)
 
     def disable_children(self, parent: Frame) -> None:
